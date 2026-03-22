@@ -1,0 +1,24 @@
+{
+  "mission_statement": "Anthropic is an AI safety and research company. We build reliable, interpretable, and steerable AI systems.",
+  "stated_values": [
+    "Act for the global good",
+    "Hold light and shade",
+    "Be good to our users",
+    "Ignite a race to the top on safety",
+    "Do the simple thing that works",
+    "Be helpful, honest, and harmless",
+    "Put the mission first"
+  ],
+  "recent_news": [
+    "What 81,000 people want from AI (March 18, 2026)",
+    "Anthropic invests $100 million into the Claude Partner Network (March 12, 2026)",
+    "Introducing The Anthropic Institute (March 11, 2026)"
+  ],
+  "blog_topics": [
+    "Quantifying infrastructure noise in agentic coding evals",
+    "Eval awareness in Claude Opus 4.6’s BrowseComp performance",
+    "Building a C compiler with a team of parallel Claudes",
+    "Designing AI-resistant technical evaluations",
+    "Demystifying evals for AI agents"
+  ]
+}

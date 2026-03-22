@@ -1,0 +1,45 @@
+{
+  "title": "Research Engineer / Research Scientist, Tokens",
+  "company": "Anthropic",
+  "location": "New York City, NY; Seattle, WA; San Francisco, CA",
+  "salary_range": "$350,000 - $500,000 USD",
+  "required_qualifications": [
+    "Significant software engineering experience",
+    "Results-oriented, with a bias towards flexibility and impact",
+    "Pick up slack, even if it goes outside your job description",
+    "Enjoy pair programming",
+    "Want to learn more about machine learning research",
+    "Care about the societal impacts of your work"
+  ],
+  "preferred_qualifications": [
+    "High performance, large-scale ML systems",
+    "GPUs, Kubernetes, Pytorch, or OS internals",
+    "Language modeling with transformers",
+    "Reinforcement learning",
+    "Large-scale ETL"
+  ],
+  "responsibilities": [
+    "Building large scale ML systems from the ground up",
+    "Making safe, steerable, trustworthy systems",
+    "Making the cluster more reliable for big jobs",
+    "Improving throughput and efficiency",
+    "Running and designing scientific experiments",
+    "Improving dev tooling",
+    "Optimizing the throughput of a new attention mechanism",
+    "Comparing the compute efficiency of two Transformer variants",
+    "Making a Wikipedia dataset in a format models can easily consume",
+    "Scaling a distributed training job to thousands of GPUs",
+    "Writing a design doc for fault tolerance strategies",
+    "Creating an interactive visualization of attention between tokens in a language model"
+  ],
+  "visa_sponsorship": true,
+  "education": "At least a Bachelor's degree in a related field or equivalent experience",
+  "experience_years": "Significant software engineering experience (not specified in years)",
+  "tech_stack": [
+    "GPUs",
+    "Kubernetes",
+    "Pytorch",
+    "OS internals",
+    "transformers"
+  ]
+}

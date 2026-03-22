@@ -19,7 +19,9 @@ import { cacheKey, cacheGet, cacheSet } from "./cache";
 const TINYFISH_URL = "https://agent.tinyfish.ai/v1/automation/run";
 
 interface TinyFishResponse {
-  result?: string;
+  run_id?: string;
+  status?: string;
+  result?: unknown;
   steps_used?: number;
   error?: string;
 }
@@ -52,12 +54,17 @@ async function callTinyFish(
   }
 
   const body = (await res.json()) as TinyFishResponse;
+  console.log("[tinyfish] Raw response:", JSON.stringify(body).slice(0, 500));
+
   if (body.error) {
     throw new Error(`TinyFish agent error: ${body.error}`);
   }
 
-  const parsed = JSON.parse(body.result ?? "null");
-  return { data: parsed, steps_used: body.steps_used ?? 0 };
+  // result is already a parsed object from the JSON response — no JSON.parse needed
+  const result = body.result ?? null;
+  // Handle edge case: if result is somehow a string, parse it
+  const data = typeof result === "string" ? JSON.parse(result) : result;
+  return { data, steps_used: body.steps_used ?? 0 };
 }
 
 /**

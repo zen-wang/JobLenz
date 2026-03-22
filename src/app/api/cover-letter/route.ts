@@ -61,7 +61,7 @@ Generate the cover letter and key points JSON now.`;
       await callLLMJson<CoverLetterResult>({
         systemPrompt: COVER_LETTER_PROMPT,
         userPrompt,
-        maxTokens: 2048,
+        maxTokens: 4096,
       });
 
     return NextResponse.json(

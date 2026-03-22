@@ -27,7 +27,7 @@ export async function POST(req: NextRequest) {
   try {
     // Fire JD extraction + company intel in parallel
     const [enrichResult, intelResult] = await Promise.all([
-      runEnrichment(jobs, max_jobs ?? 5),
+      runEnrichment(jobs, max_jobs ?? 10),
       runCompanyIntel(company_name, company_domain),
     ]);
 

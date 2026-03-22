@@ -26,7 +26,7 @@ export async function POST(req: NextRequest) {
       await callLLMJson<ResumeProfile>({
         systemPrompt: RESUME_PARSE_PROMPT,
         userPrompt: resume_text,
-        maxTokens: 4096,
+        maxTokens: 8192,
       });
 
     return NextResponse.json(
@@ -40,6 +40,7 @@ export async function POST(req: NextRequest) {
     );
   } catch (err) {
     const message = err instanceof Error ? err.message : "Unknown error";
+    console.error("[parse-resume] Failed:", message);
     return NextResponse.json({ error: message }, { status: 502 });
   }
 }

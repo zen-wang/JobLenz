@@ -4,6 +4,7 @@ import { useState, useCallback } from "react";
 import type {
   PipelineStage,
   DiscoverResult,
+  DiscoverSSEEvent,
   EnrichResult,
   ScoreResult,
   ResumeProfile,
@@ -41,6 +42,7 @@ export default function Home() {
   const [companyIntel, setCompanyIntel] = useState<CompanyIntel | null>(null);
   const [llmMetadata, setLlmMetadata] = useState<LLMMetadata | null>(null);
 
+  const [discoverLogs, setDiscoverLogs] = useState<string[]>([]);
   const [selectedJobIdx, setSelectedJobIdx] = useState(0);
 
   // Tailor & Cover Letter state (per-job, keyed by job URL)
@@ -64,13 +66,14 @@ export default function Home() {
       setCompanyIntel(null);
       setLlmMetadata(null);
       setSelectedJobIdx(0);
+      setDiscoverLogs([]);
       setTailorResults({});
       setCoverLetterResults({});
       setTailorLoading(null);
       setCoverLetterLoading(null);
 
       try {
-        // ─── Stage 1: Discover ───
+        // ─── Stage 1: Discover (SSE) ───
         setStage("discovering");
         const discoverRes = await fetch("/api/discover", {
           method: "POST",
@@ -80,11 +83,45 @@ export default function Home() {
             role_query: input.role_query,
           }),
         });
+
+        // Non-streaming error (400 validation)
         if (!discoverRes.ok) {
           const err = await discoverRes.json();
           throw new Error(err.error || "Discovery failed");
         }
-        const discover: DiscoverResult = await discoverRes.json();
+
+        // Parse SSE stream
+        const reader = discoverRes.body?.getReader();
+        if (!reader) throw new Error("No response body");
+        const decoder = new TextDecoder();
+        let buffer = "";
+        let discover: DiscoverResult | null = null;
+
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          buffer += decoder.decode(value, { stream: true });
+
+          // Process complete SSE messages
+          const parts = buffer.split("\n\n");
+          buffer = parts.pop() ?? "";
+
+          for (const part of parts) {
+            const line = part.trim();
+            if (!line.startsWith("data: ")) continue;
+            const event: DiscoverSSEEvent = JSON.parse(line.slice(6));
+
+            if (event.type === "progress") {
+              setDiscoverLogs((prev) => [...prev, event.message]);
+            } else if (event.type === "result") {
+              discover = event.data;
+            } else if (event.type === "error") {
+              throw new Error(event.message);
+            }
+          }
+        }
+
+        if (!discover) throw new Error("Stream ended without result");
         setDiscoverResult(discover);
 
         // ─── Parse resume in parallel with enrichment ───
@@ -95,13 +132,13 @@ export default function Home() {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
-              jobs: discover.jobs.slice(0, 5).map((j) => ({
+              jobs: discover.jobs.slice(0, 10).map((j) => ({
                 title: j.title,
                 url: j.url,
               })),
               company_name: discover.company.name,
               company_domain: discover.company.domain,
-              max_jobs: 5,
+              max_jobs: 10,
             }),
           }),
           fetch("/api/parse-resume", {
@@ -270,6 +307,7 @@ export default function Home() {
                 setResumeProfile(null);
                 setCompanyIntel(null);
                 setLlmMetadata(null);
+                setDiscoverLogs([]);
                 setTailorResults({});
                 setCoverLetterResults({});
               }}
@@ -293,7 +331,7 @@ export default function Home() {
         </section>
 
         {/* Pipeline progress */}
-        <PipelineProgress stage={stage} />
+        <PipelineProgress stage={stage} discoverLogs={discoverLogs} />
 
         {/* Error */}
         {error && (

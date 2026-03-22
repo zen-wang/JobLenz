@@ -1,9 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
 import { callLLMJson } from "@/lib/llm";
 import { FIT_REPORT_PROMPT } from "@/lib/prompts";
+import {
+  computeDeterministicScores,
+  computeOverallScore,
+} from "@/lib/scoring";
 import type {
   CompanyIntel,
-  FitReport,
+  FitDimension,
+  Evidence,
+  MissingRequirements,
   JobDetails,
   ResumeProfile,
   ScoreResult,
@@ -20,6 +26,14 @@ interface ScoreRequest {
   resume_profile: ResumeProfile;
 }
 
+interface LLMFitResponse {
+  dimensions: FitDimension[];
+  missing_requirements: MissingRequirements;
+  strengths: Evidence[];
+  concerns: Evidence[];
+  next_steps: string;
+}
+
 export async function POST(req: NextRequest) {
   const start = Date.now();
 
@@ -32,9 +46,9 @@ export async function POST(req: NextRequest) {
 
   const { enriched_jobs, company_intel, resume_profile } = body;
 
-  if (!enriched_jobs?.length || !resume_profile) {
+  if (!enriched_jobs?.length || !resume_profile || !company_intel) {
     return NextResponse.json(
-      { error: "enriched_jobs and resume_profile are required" },
+      { error: "enriched_jobs, company_intel, and resume_profile are required" },
       { status: 400 },
     );
   }
@@ -47,6 +61,14 @@ export async function POST(req: NextRequest) {
 
     const scored = await Promise.all(
       scorable.map(async (job) => {
+        // 1. Compute deterministic scores
+        const deterministic = computeDeterministicScores(
+          job.details!,
+          company_intel,
+          resume_profile,
+        );
+
+        // 2. Call LLM for qualitative dimensions
         const userPrompt = buildScoreUserPrompt(
           job.details!,
           company_intel,
@@ -54,20 +76,25 @@ export async function POST(req: NextRequest) {
         );
 
         const { data, provider, model, latency_ms } =
-          await callLLMJson<FitReport>({
+          await callLLMJson<LLMFitResponse>({
             systemPrompt: FIT_REPORT_PROMPT,
             userPrompt,
-            maxTokens: 4096,
+            maxTokens: 8192,
           });
+
+        // 3. Compute overall score from LLM dimensions + deterministic
+        const overall_score = computeOverallScore(data.dimensions, deterministic);
 
         return {
           url: job.url,
           title: job.title,
-          overall_score: data.overall_score,
+          overall_score,
           dimensions: data.dimensions,
           strengths: data.strengths,
           concerns: data.concerns,
           next_steps: data.next_steps,
+          deterministic,
+          missing_requirements: data.missing_requirements,
           _llm: { provider, model, latency_ms },
         };
       }),
@@ -92,6 +119,7 @@ export async function POST(req: NextRequest) {
     });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Unknown error";
+    console.error("[score] Failed:", message);
     return NextResponse.json({ error: message }, { status: 502 });
   }
 }
@@ -109,14 +137,8 @@ ${JSON.stringify(jobDetails, null, 2)}
 
 ## Company Intelligence
 
-### H-1B Data (status: ${companyIntel.h1b.status})
-${companyIntel.h1b.data ? JSON.stringify(companyIntel.h1b.data, null, 2) : "DATA UNAVAILABLE — agent failed"}
-
 ### Company Values (status: ${companyIntel.values.status})
 ${companyIntel.values.data ? JSON.stringify(companyIntel.values.data, null, 2) : "DATA UNAVAILABLE — agent failed"}
 
-### Salary Data (status: ${companyIntel.salary.status})
-${companyIntel.salary.data ? JSON.stringify(companyIntel.salary.data, null, 2) : "DATA UNAVAILABLE — agent failed"}
-
-Generate the fit report JSON now.`;
+Generate the fit assessment JSON now. Remember: score ONLY Technical Fit, Experience Alignment, and Culture Alignment. Do NOT include overall_score.`;
 }

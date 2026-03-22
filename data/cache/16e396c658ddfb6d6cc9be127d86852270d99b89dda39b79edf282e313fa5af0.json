@@ -1,0 +1,42 @@
+{
+  "title": "[Expression of Interest] Research Scientist / Engineer, Honesty",
+  "company": "Anthropic",
+  "location": "New York City, NY; San Francisco, CA",
+  "salary_range": "$350,000 - $500,000 USD",
+  "required_qualifications": [
+    "MS/PhD in Computer Science, ML, or related field",
+    "strong programming skills in Python",
+    "industry experience with language model finetuning and classifier training",
+    "proficiency in experimental design and statistical analysis for measuring improvements in calibration and accuracy",
+    "care about AI safety and the accuracy and honesty of both current and future AI systems",
+    "experience in data science or the creation and curation of datasets for finetuning LLMs",
+    "an understanding of various metrics of uncertainty, calibration, and truthfulness in model outputs"
+  ],
+  "preferred_qualifications": [
+    "published work on hallucination prevention, factual grounding, or knowledge integration in language models",
+    "experience with fact-grounding techniques",
+    "background in developing confidence estimation or calibration methods for ML models",
+    "a track record of creating and maintaining factual knowledge bases",
+    "familiarity with RLHF specifically applied to improving model truthfulness",
+    "worked with crowd-sourcing platforms and human feedback collection systems",
+    "experience developing evaluations of model accuracy or hallucinations"
+  ],
+  "responsibilities": [
+    "design and implement novel data curation pipelines to identify, verify, and filter training data for accuracy given the model’s knowledge",
+    "develop specialized classifiers to detect potential hallucinations or miscalibrated claims made by the model",
+    "create and maintain comprehensive honesty benchmarks and evaluation frameworks",
+    "implement techniques to ground model outputs in verified information, such as search and retrieval-augmented generation (RAG) systems",
+    "design and deploy human feedback collection specifically for identifying and correcting miscalibrated responses",
+    "design and implement prompting pipelines to generate data that improves model accuracy and honesty",
+    "develop and test novel RL environments that reward truthful outputs and penalize fabricated claims",
+    "create tools to help human evaluators efficiently assess model outputs for accuracy"
+  ],
+  "visa_sponsorship": true,
+  "education": "at least a Bachelor's degree in a related field or equivalent experience",
+  "experience_years": "null",
+  "tech_stack": [
+    "Python",
+    "RAG systems",
+    "RL environments"
+  ]
+}

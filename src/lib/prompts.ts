@@ -47,44 +47,38 @@ Rules:
 - For skills categorization: "languages" = programming languages, "frameworks" = libraries/frameworks, "tools" = dev tools/platforms, "cloud" = cloud services, "ml" = ML/AI specific tools.
 - Return ONLY the JSON object, no explanation.`;
 
-export const FIT_REPORT_PROMPT = `You are a job fit analyst. Given a candidate's resume profile, an enriched job description, and company intelligence data, produce a detailed fit report.
+export const FIT_REPORT_PROMPT = `You are a senior technical hiring manager screening resumes against job descriptions. Given a candidate's resume profile, an enriched job description, and company intelligence data, produce a fit assessment.
 
-Score these 5 dimensions (1-10 scale):
+You score ONLY these 3 dimensions (1-10 scale). Visa, compensation, ATS keywords, location, and education are computed deterministically in code — do NOT score them.
 
 1. **Technical Fit**: How well do the candidate's skills and tech stack match the job requirements?
-   - Sources: job description (required_qualifications, tech_stack)
+   - Sources: job description (required_qualifications, tech_stack), resume (skills, projects)
    - Compare specific technologies, languages, frameworks
 
 2. **Experience Alignment**: Does the candidate's experience level and domain match?
-   - Sources: job description (experience_years, responsibilities)
+   - Sources: job description (experience_years, responsibilities), resume (experience)
    - Compare years, role seniority, domain relevance
 
-3. **Visa Feasibility**: How likely is visa sponsorship based on available data?
-   - Sources: H-1B data (if available), job description (visa_sponsorship field)
-   - If H-1B data status is "failed" or missing: set confidence to "low" and state "DATA UNAVAILABLE — H-1B lookup agent did not return data"
-   - If candidate has no visa_status mentioned, note this uncertainty
-
-4. **Culture Alignment**: How well does the candidate align with company values?
-   - Sources: company values data (if available)
+3. **Culture Alignment**: How well does the candidate align with company values?
+   - Sources: company values data (if available), resume (experience, projects)
    - If values data status is "failed" or missing: set confidence to "low" and state "DATA UNAVAILABLE — company values agent did not return data"
-
-5. **Compensation Competitiveness**: Is the role's compensation competitive for the candidate?
-   - Sources: salary data (if available), job description salary_range
-   - If salary data status is "failed" or missing: set confidence to "low" and state "DATA UNAVAILABLE — salary lookup agent did not return data"
 
 Return valid JSON matching this exact schema:
 {
-  "overall_score": <number 1-10, weighted average of dimensions>,
   "dimensions": [
     {
       "name": "Technical Fit",
       "score": <number 1-10>,
       "reasoning": "<2-3 sentences explaining the score with specific evidence>",
-      "sources": ["<which data source: 'job_description', 'h1b_data', 'company_values', 'salary_data', 'resume'>"],
+      "sources": ["<which data source: 'job_description', 'company_values', 'resume'>"],
       "confidence": "<'high' | 'medium' | 'low'>",
       "confidence_reason": "<why this confidence level>"
     }
   ],
+  "missing_requirements": {
+    "required": ["<must-have requirements the candidate lacks>"],
+    "preferred": ["<nice-to-have requirements the candidate lacks>"]
+  },
   "strengths": [
     {
       "text": "<strength statement>",
@@ -104,10 +98,11 @@ Return valid JSON matching this exact schema:
 
 CRITICAL RULES:
 - NEVER hallucinate. If data is missing (agent status "failed"), say "DATA UNAVAILABLE" explicitly.
-- Every claim must cite its source (job_description, h1b_data, company_values, salary_data, resume).
-- When an agent failed, set that dimension's confidence to "low".
-- The overall_score should be a weighted average favoring Technical Fit and Experience Alignment.
+- Every claim must cite its source (job_description, company_values, resume).
+- Do NOT include an overall_score — it is computed in code.
+- Do NOT score Visa, Compensation, ATS Keywords, Location, or Education — they are computed in code.
 - Include 2-4 strengths and 1-3 concerns.
+- For missing_requirements: list specific skills, tools, or qualifications from the JD that the candidate lacks. "required" = from required_qualifications, "preferred" = from preferred_qualifications.
 - Return ONLY the JSON object, no explanation.`;
 
 export const TAILOR_PROMPT = `You are a resume tailoring expert. Given a candidate's resume profile, a target job description, and a fit report, produce a tailored resume in RESUMX MARKDOWN FORMAT, plus a JSON changes summary.

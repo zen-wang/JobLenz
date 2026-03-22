@@ -1,9 +1,11 @@
 "use client";
 
+import { useRef, useEffect } from "react";
 import type { PipelineStage } from "@/lib/types";
 
 interface PipelineProgressProps {
   stage: PipelineStage;
+  discoverLogs?: string[];
 }
 
 const STAGES: { key: PipelineStage; label: string }[] = [
@@ -62,11 +64,19 @@ function getStatus(
   return "pending";
 }
 
-export default function PipelineProgress({ stage }: PipelineProgressProps) {
+export default function PipelineProgress({ stage, discoverLogs }: PipelineProgressProps) {
+  const logsEndRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    logsEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [discoverLogs]);
+
   if (stage === "idle") return null;
 
+  const showLogs = stage === "discovering" && discoverLogs && discoverLogs.length > 0;
+
   return (
-    <div className="w-full">
+    <div className="w-full space-y-3">
       <div className="flex items-center gap-1">
         {STAGES.map((s, i) => {
           const status = getStatus(s.key, stage);
@@ -101,6 +111,24 @@ export default function PipelineProgress({ stage }: PipelineProgressProps) {
           );
         })}
       </div>
+
+      {showLogs && (
+        <div className="bg-gray-900 rounded-lg p-3 max-h-36 overflow-y-auto font-mono text-xs">
+          {discoverLogs.map((msg, i) => (
+            <div
+              key={i}
+              className={
+                i === discoverLogs.length - 1
+                  ? "text-green-400"
+                  : "text-gray-500"
+              }
+            >
+              {msg}
+            </div>
+          ))}
+          <div ref={logsEndRef} />
+        </div>
+      )}
     </div>
   );
 }

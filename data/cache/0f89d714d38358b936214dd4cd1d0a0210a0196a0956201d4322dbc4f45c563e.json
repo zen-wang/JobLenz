@@ -1,0 +1,41 @@
+{
+  "title": "Anthropic AI Security Fellow",
+  "company": "Anthropic",
+  "location": "London, UK; Ontario, CAN; Remote-Friendly, United States; San Francisco, CA",
+  "salary_range": "Weekly stipend of 3,850 USD / 2,310 GBP / 4,300 CAD",
+  "required_qualifications": [
+    "Motivated by reducing catastrophic risks from advanced AI systems",
+    "Excited to transition into full-time empirical AI safety research and would be interested in a full-time role at Anthropic",
+    "Strong technical background in computer science, mathematics, physics, cybersecurity, or related fields",
+    "Thrive in fast-paced, collaborative environments",
+    "Can implement ideas quickly and communicate clearly",
+    "Fluent in Python programming",
+    "Available to work full-time on the Fellows program for 4 months"
+  ],
+  "preferred_qualifications": [
+    "Contributed to open-source projects in LLM- or security-adjacent repositories",
+    "Demonstrated success in bringing clarity and ownership to ambiguous technical problems",
+    "Experience with pentesting, vulnerability research, or other offensive security",
+    "A history demonstrating desire to do the 'dirty work' that results in high-quality outputs",
+    "Reported CVEs, or been awarded for bug bounty vulnerabilities",
+    "Experience with empirical ML research projects",
+    "Experience with deep learning frameworks and experiment management"
+  ],
+  "responsibilities": [
+    "Work on an empirical project aligned with research priorities",
+    "Produce a public output (e.g. a paper submission)",
+    "Use external infrastructure such as open-source models and public APIs",
+    "Participate in direct mentorship from Anthropic researchers",
+    "Connect to the broader AI safety research community"
+  ],
+  "visa_sponsorship": false,
+  "education": "Bachelor's degree in a related field or equivalent experience",
+  "experience_years": "Not specified (regardless of previous experience)",
+  "tech_stack": [
+    "Python",
+    "Open-source models",
+    "Public APIs",
+    "Deep learning frameworks",
+    "Experiment management"
+  ]
+}

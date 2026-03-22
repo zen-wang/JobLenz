@@ -52,7 +52,7 @@ Generate the tailored Resumx markdown and changes summary JSON now.`;
       await callLLMJson<TailorResult>({
         systemPrompt: TAILOR_PROMPT,
         userPrompt,
-        maxTokens: 4096,
+        maxTokens: 16384,
       });
 
     return NextResponse.json(

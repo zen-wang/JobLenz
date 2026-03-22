@@ -1,0 +1,37 @@
+{
+  "title": "Anthropic AI Safety Fellow",
+  "company": "Anthropic",
+  "location": "London, UK; Ontario, CAN; Remote-Friendly, United States; San Francisco, CA",
+  "salary_range": "3,850 USD / 2,310 GBP / 4,300 CAD per week",
+  "required_qualifications": [
+    "Fluent in Python programming",
+    "Available to work full-time on the Fellows program for 4 months",
+    "Have work authorization in the US, UK, or Canada and be located in that country during the program",
+    "Strong technical background in computer science, mathematics, physics, cybersecurity, or related fields",
+    "Thrive in fast-paced, collaborative environments",
+    "Ability to implement ideas quickly and communicate clearly"
+  ],
+  "preferred_qualifications": [
+    "Experience with empirical ML research projects",
+    "Experience working with Large Language Models",
+    "Experience in research areas like Scalable Oversight, Adversarial Robustness, Model Organisms, or Mechanistic Interpretability",
+    "Experience with deep learning frameworks and experiment management",
+    "Track record of open-source contributions"
+  ],
+  "responsibilities": [
+    "Work on an empirical project aligned with Anthropic's research priorities",
+    "Use external infrastructure (open-source models, public APIs) for research",
+    "Produce a public output such as a paper submission",
+    "Undergo project selection and mentor matching process"
+  ],
+  "visa_sponsorship": false,
+  "education": "Bachelor's degree in a related field or equivalent experience mentioned as typical, though the program is open regardless of previous experience levels",
+  "experience_years": "null",
+  "tech_stack": [
+    "Python",
+    "Deep learning frameworks",
+    "Experiment management tools",
+    "Open-source models",
+    "Public APIs"
+  ]
+}

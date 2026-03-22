@@ -15,6 +15,11 @@ interface ScoutMetadata {
   scraper_latency_ms: number;
   method: string;
   total_jobs_found: number;
+  filter_stats?: {
+    total_raw: number;
+    total_filtered: number;
+    removed_count: number;
+  };
 }
 
 interface LLMMetadata {
@@ -79,6 +84,12 @@ export default function ObservabilityPanel({
                 <Stat
                   label="Scraper"
                   value={formatMs(scoutMetadata.scraper_latency_ms)}
+                />
+              )}
+              {scoutMetadata.filter_stats && (
+                <Stat
+                  label="Filter"
+                  value={`${scoutMetadata.filter_stats.total_filtered}/${scoutMetadata.filter_stats.total_raw}`}
                 />
               )}
             </>

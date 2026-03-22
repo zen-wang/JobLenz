@@ -1,5 +1,10 @@
 // === Discovery ===
 
+export type DiscoverSSEEvent =
+  | { type: "progress"; message: string; sub_stage: string; detail?: string }
+  | { type: "result"; data: DiscoverResult }
+  | { type: "error"; message: string };
+
 export interface ScoutResult {
   filtered_url: string;
   url_changed: boolean;
@@ -91,6 +96,14 @@ export interface ResumeProfile {
   visa_status?: string;
 }
 
+// === Filter ===
+
+export interface FilterStats {
+  total_raw: number;
+  total_filtered: number;
+  removed_count: number;
+}
+
 // === Scoring ===
 
 export interface FitDimension {
@@ -114,6 +127,50 @@ export interface FitReport {
   strengths: Evidence[];
   concerns: Evidence[];
   next_steps: string;
+}
+
+// === Deterministic Scoring ===
+
+export interface VisaAssessment {
+  status: "sponsor_confirmed" | "sponsor_likely" | "sponsor_unknown" | "not_needed";
+  company_sponsors: boolean | null;
+  candidate_needs_visa: boolean | null;
+  h1b_applications: number | null;
+}
+
+export interface ATSKeywordMatch {
+  match_percentage: number;
+  matched_keywords: string[];
+  missing_keywords: string[];
+}
+
+export interface CompensationAssessment {
+  status: "competitive" | "above_market" | "below_market" | "data_unavailable";
+  job_range: string | null;
+  market_range: string | null;
+}
+
+export interface LocationAssessment {
+  status: "match" | "partial" | "remote" | "unknown";
+}
+
+export interface EducationAssessment {
+  status: "exceeds" | "meets" | "below" | "unknown";
+  required: string | null;
+  candidate: string | null;
+}
+
+export interface DeterministicScores {
+  visa: VisaAssessment;
+  ats_keywords: ATSKeywordMatch;
+  compensation: CompensationAssessment;
+  location: LocationAssessment;
+  education: EducationAssessment;
+}
+
+export interface MissingRequirements {
+  required: string[];
+  preferred: string[];
 }
 
 // === Metrics ===
@@ -196,6 +253,7 @@ export interface DiscoverResult {
     scout_steps: number;
     scraper_latency_ms: number;
     total_jobs_found: number;
+    filter_stats?: FilterStats;
   };
 }
 
@@ -234,5 +292,7 @@ export interface ScoreResult {
     strengths: Evidence[];
     concerns: Evidence[];
     next_steps: string;
+    deterministic?: DeterministicScores;
+    missing_requirements?: MissingRequirements;
   }[];
 }

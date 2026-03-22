@@ -13,7 +13,12 @@ export default function DiscoverResults({ result }: DiscoverResultsProps) {
     <div className="space-y-3">
       <div className="flex items-baseline justify-between">
         <h3 className="text-sm font-semibold text-gray-900">
-          {company.name} — {jobs.length} jobs found
+          {company.name} — {jobs.length} jobs match
+          {scout_metadata.filter_stats && (
+            <span className="font-normal text-gray-500">
+              {" "}(filtered from {scout_metadata.filter_stats.total_raw} total)
+            </span>
+          )}
         </h3>
         <span className="text-xs text-gray-500">
           via {scout_metadata.method === "scout+scraper" ? "Scout + Scraper" : "Scout only"}

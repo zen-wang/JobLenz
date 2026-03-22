@@ -1,0 +1,82 @@
+Wei-An Wang
+480-974-2838 | wwang360@asu.edu | linkedin.com/in/weianwang789 | github.com/zen-wang
+
+SUMMARY
+Machine Learning Engineer with hands-on experience in recommendation systems, RAG pipelines, LLM-based content enrichment, large-scale data processing with PySpark, cloud ML serving on AWS, computer vision, and multimodal AI. Expertise in building scalable ML pipelines, trustworthy AI systems, and interpretable models. Seeking MLE roles with secondary interest in Data Scientist and Software Engineer positions.
+
+EDUCATION
+
+M.S. Computer Science | Arizona State University, Tempe, AZ | Expected May 2026
+GPA: 3.72
+Relevant Coursework: Machine Learning, NLP, Data Mining, Data Processing at Scale, Semantic Web Mining, Cloud Computing
+
+B.S. Computer Science & Information Engineering | Tamkang University, Taiwan | 2019 - 2023
+
+EXPERIENCE
+
+Spotify Million Playlist Recommendation Engine | PySpark, Spark MLlib, ALS, Word2Vec, Python | Feb 2026
+- Built a hybrid recommendation ensemble (ALS collaborative filtering + Word2Vec sequential embeddings + popularity baseline) on 1M playlists and 66M interactions using PySpark and Spark MLlib, achieving R-Precision 0.1816 — a 287.5% improvement over the popularity baseline
+- Architected a 5-stage PySpark batch pipeline processing 33GB raw data through schema-driven ingestion, Spark SQL feature engineering, distributed model training, vectorized evaluation, and format-verified submission generation — end-to-end in ~75 minutes
+- Engineered track co-occurrence features via broadcast self-join on the 66M-row interaction table with 6 layered optimizations (top-10K pre-filtering, caching, inequality pruning, post-count thresholding), producing 15M co-occurrence pairs
+- Optimized offline evaluation from ~3 min/playlist to ~30ms (>5,000× speedup) by replacing Python dict-based scoring with vectorized NumPy index arrays, matrix multiplication, and argpartition top-K selection
+- Trained ALS collaborative filtering (rank=64, implicit feedback) on a 99.997%-sparse interaction matrix of 1M playlists × 2.2M tracks, with left_anti join validation split ensuring zero data leakage
+- Designed cold-start handling where playlists with 0 seed tracks fall back to popularity-only recommendations, while playlists with 1+ seeds receive full hybrid scoring
+- Demonstrated that ensemble methods consistently outperform individual models: ALS alone achieved +269% R-Precision, Word2Vec +142%, but the hybrid (0.5/0.4/0.1 weighting) achieved +287.5% — confirming that collaborative, sequential, and popularity signals are complementary
+- Quantified the Spark vs. pandas scaling boundary: pandas matches Spark on simple aggregations but collapses on multi-table joins (81.2s vs 15.9s, 5.1× Spark advantage at 66M rows), validating distributed processing for production-scale recommendation data
+
+TrendScout AI: Hybrid RAG + Knowledge Graph | GPT-4, Gemini 2.0 Flash, Neo4j, ChromaDB, LangChain, Python | Aug - Nov 2025
+- Designed a hybrid RAG + Knowledge Graph retrieval system outperforming RAG-only by 3× win rate (44% vs 14%) across 50 evaluation questions, demonstrating that structured knowledge representation significantly improves LLM-generated answer quality
+- Engineered an LLM-powered entity extraction pipeline using Gemini API to convert 176 unstructured posts into a structured Neo4j knowledge graph with 560+ entities (7 node types, 8 relationship types), enabling scalable content understanding and enrichment
+- Built a complete LLM-as-judge evaluation framework with automated A/B testing, Gemini 2.0 Flash scoring on 3 axes (accuracy, completeness, relevance), and category-level breakdowns — establishing reproducible baselines for retrieval quality measurement
+- Implemented an adaptive source selection mechanism that classifies query intent and dynamically adjusts RAG retrieval depth (1–5 sources), with score-based filtering and deduplication
+- Architected a full-stack hybrid retrieval system combining Neo4j (Cypher queries) and ChromaDB (semantic search) with GPT-4 synthesis, served via Flask with toggleable KG/RAG retrieval and source transparency
+
+Cross-Modal Video Evidence Retrieval | CLIP, FAISS, PyTorch, Python | Jan - May 2025
+- Reduced VLM hallucination in video QA by building a cross-modal evidence retrieval pipeline using CLIP embeddings and FAISS indexing across 2,004 instructional videos, achieving 70.99% Top-10 evidence retrieval accuracy
+- Designed temporal-aware reranking with answerability-adaptive weighting that dynamically adjusts text vs. image emphasis per query type, demonstrating that cross-modal fusion improves retrieval over single-modality approaches
+- Demonstrated that text retrieval outperforms image-only by 3.6× (21.30% vs 5.82%) in instructional video domains, attributing the gap to CLIP's web-trained distribution mismatch
+- Architected a modular retrieval pipeline: FFmpeg-based frame extraction → CLIP batch embedding (vision + text) → per-video FAISS indexing → Top-K retrieval → temporal reranking, processing 2,004 videos
+
+Insurance Premium Prediction — SHAP-Informed Feature Engineering | XGBoost, LightGBM, CatBoost, SHAP, Optuna, scikit-learn, Python | Fall 2025
+- Built an interpretable feature engineering pipeline by applying SHAP interaction analysis and mutual information scoring to a 1.2M-record dataset, discovering that the dominant predictor had a 0.77 non-linear gap completely invisible to standard correlation analysis
+- Engineered 11 new features from SHAP-guided interaction pairs, non-linearity transformations, and K-Fold target encoding, expanding model capacity while removing 6 noise features confirmed by both MI and SHAP evidence
+- Designed a dual-pipeline comparison framework evaluating 4 gradient boosting architectures (XGBoost, LightGBM, CatBoost, AdaBoost) with standardized 3-fold cross-validation
+- Replaced brute-force Grid Search with Bayesian hyperparameter optimization (Optuna TPE sampler) trained on full data
+- Uncovered hidden non-linear drivers by comparing mutual information against Pearson correlation across 22 features, revealing that the two strongest predictors showed near-zero linear correlation but high non-linear dependency
+
+Elastic Face Recognition on AWS — Custom Autoscaling Cloud Application | AWS EC2, S3, SQS, PyTorch, Flask, Python | Sep - Oct 2025
+- Deployed a PyTorch-based face recognition model across up to 15 auto-scaled EC2 instances, achieving 100% classification accuracy with <1.2s average latency under 100 concurrent requests
+- Built a custom AMI packaging the complete inference environment (PyTorch, model weights, worker script) to enable rapid instance provisioning
+- Implemented an end-to-end ML serving pipeline: image ingestion → S3 storage → SQS-based job distribution → distributed PyTorch inference → result aggregation
+- Architected a multi-tier elastic cloud application on AWS with a custom autoscaling controller that dynamically scales 0–15 instances based on SQS queue depth
+- Implemented a distributed self-termination pattern for scale-in — each worker monitors queue state and stops itself via EC2 API + IMDSv2
+
+Serverless & Edge Face Recognition Pipeline | AWS Lambda, ECR, IoT Greengrass, MQTT, Docker, PyTorch, Python | Nov - Dec 2025
+- Deployed a two-stage ML inference pipeline (MTCNN face detection → InceptionResnetV1 recognition) as containerized Lambda functions, sharing a single Docker image via ECR
+- Implemented face recognition using 512-dimensional FaceNet embeddings compared via L2 distance, iteratively debugging embedding-dataset mismatches to improve accuracy from 23% to 88%
+- Architected an edge-cloud hybrid face recognition pipeline using AWS IoT Greengrass and Lambda connected via SQS, achieving 100/100 + bonus points with <2.5s avg latency
+- Implemented edge-side "No-Face" short-circuit that bypasses cloud inference when no face is detected, reducing latency and conserving cloud resources
+
+Real-Time Gesture Control Platform | MediaPipe, OpenCV, PyAutoGui, Python | 2022
+- Developed a rotation-invariant hand gesture classifier on MediaPipe's 21 3D landmarks using signed point-to-line-segment distance geometry, recognizing ~28 distinct gesture-to-command mappings — evolved through 3 algorithm iterations
+- Built a real-time perception-to-action pipeline processing 1920×1080 webcam frames at 43 FPS (23ms median latency, P95 < 25ms)
+- Architected a reusable gesture control platform powering 3 distinct applications (YouTube controller, desktop mouse replacement, contactless ordering system)
+- Set detection confidence threshold at 0.97, deliberately trading recall for precision to prevent false gesture triggers during continuous use
+
+LuluTracker — Multi-Region E-Commerce Monitoring Chrome Extension | JavaScript, Chrome Manifest V3 | Feb 2025
+- Architected a Chrome Manifest V3 extension (2,993 lines, 59 functions) in 3 days that monitors product availability across 3 international e-commerce storefronts with fundamentally different web frameworks
+- Engineered a cross-platform data extraction pipeline unifying product intelligence from Next.js and Salesforce Commerce Cloud architectures, with 8+ fallback chains per extraction point
+- Built a quad-strategy SPA navigation detector combining MutationObservers, debounced click listeners, and polling fallback
+
+Priority Matrix — Eisenhower Task Manager with AI Planning Agent | Electron, React 18, Claude API, OpenAI API, Ollama, Chart.js | Feb 2025
+- Built an AI task planning agent supporting 3 LLM backends (Anthropic Claude, OpenAI GPT, Ollama local models) with provider abstraction, achieving ~95% correct classification through structured JSON output validation
+- Implemented robust LLM response parsing handling reasoning model artifacts, markdown fence removal, and regex JSON extraction fallbacks with type-checked validation
+- Designed a human-in-the-loop preview-before-commit pattern where AI suggestions display in a review card with Edit/Add/Discard actions
+- Implemented zero-data-loss persistence using write-ahead atomic saves with a 5-source load fallback chain
+
+TECHNICAL SKILLS
+Programming: Python, SQL, JavaScript, Java, C++, Scala (familiar)
+ML/AI Frameworks: PyTorch, PySpark, Spark MLlib, scikit-learn, LangChain, FAISS, SHAP, Optuna, CLIP, OpenCV, MediaPipe
+Data & Infrastructure: Apache Spark, Pandas, NumPy, Neo4j, ChromaDB, SQL (MySQL, PostgreSQL), Parquet, Docker, Git
+Cloud & Platforms: AWS (EC2, S3, SQS, Lambda, IoT Greengrass), Flask, Electron
+Specializations: Recommendation Systems, RAG Systems, LLM Evaluation, Knowledge Graphs, Content Enrichment, NLP, Computer Vision, Multimodal AI, Feature Engineering, Trustworthy AI, Interpretable ML

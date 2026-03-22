@@ -13,7 +13,7 @@ type LLMProvider = "gemini" | "claude";
 interface LLMRequest {
   systemPrompt: string;
   userPrompt: string;
-  /** Desired max tokens in the response. Default 4096. */
+  /** Desired max tokens in the response. Default 8192. */
   maxTokens?: number;
 }
 
@@ -57,7 +57,7 @@ function resolveProvider(): { provider: LLMProvider; apiKey: string } {
 
 // ─── Gemini ──────────────────────────────────────────────────
 
-const GEMINI_MODEL = "gemini-2.0-flash";
+const GEMINI_MODEL = "gemini-2.5-flash";
 
 async function callGemini(
   apiKey: string,
@@ -79,7 +79,7 @@ async function callGemini(
         },
       ],
       generationConfig: {
-        maxOutputTokens: req.maxTokens ?? 4096,
+        maxOutputTokens: req.maxTokens ?? 8192,
         temperature: 0.2,
         responseMimeType: "application/json",
       },
@@ -92,12 +92,18 @@ async function callGemini(
   }
 
   const data = await res.json();
-  const text =
-    data?.candidates?.[0]?.content?.parts?.[0]?.text ??
-    "";
+  const candidate = data?.candidates?.[0];
+  const text = candidate?.content?.parts?.[0]?.text ?? "";
+  const finishReason = candidate?.finishReason;
 
   if (!text) {
     throw new Error("Gemini returned empty response");
+  }
+
+  if (finishReason === "MAX_TOKENS") {
+    throw new Error(
+      `Gemini output truncated (maxOutputTokens=${req.maxTokens ?? 8192} was not enough). Increase maxTokens.`,
+    );
   }
 
   return { text, model: GEMINI_MODEL };
@@ -121,7 +127,7 @@ async function callClaude(
     },
     body: JSON.stringify({
       model: CLAUDE_MODEL,
-      max_tokens: req.maxTokens ?? 4096,
+      max_tokens: req.maxTokens ?? 8192,
       temperature: 0.2,
       system: req.systemPrompt,
       messages: [{ role: "user", content: req.userPrompt }],
@@ -186,11 +192,20 @@ export async function callLLMJson<T>(req: LLMRequest): Promise<{
       .replace(/\n?```\s*$/, "");
   }
 
-  const data = JSON.parse(cleaned) as T;
-  return {
-    data,
-    provider: response.provider,
-    model: response.model,
-    latency_ms: response.latency_ms,
-  };
+  try {
+    const data = JSON.parse(cleaned) as T;
+    return {
+      data,
+      provider: response.provider,
+      model: response.model,
+      latency_ms: response.latency_ms,
+    };
+  } catch (parseErr) {
+    console.error(
+      `[llm] JSON parse failed (${response.provider}/${response.model}, ${response.text.length} chars). Tail: ...${response.text.slice(-200)}`,
+    );
+    throw new Error(
+      `LLM returned invalid JSON (${response.provider}/${response.model}): ${parseErr instanceof Error ? parseErr.message : parseErr}`,
+    );
+  }
 }
