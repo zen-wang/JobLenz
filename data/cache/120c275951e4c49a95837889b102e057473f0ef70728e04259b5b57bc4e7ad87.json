@@ -1,30 +1,54 @@
 {
   "title": "Machine Learning Systems Engineer, Research Tools",
   "company": "Anthropic",
-  "location": "San Francisco, CA",
-  "salary_range": null,
+  "location": "San Francisco, CA | New York City, NY | Seattle, WA",
+  "salary_range": "$320,000 - $405,000 USD",
   "required_qualifications": [
-    "Experience building ML infrastructure",
-    "Python, C++",
-    "Distributed systems experience"
+    "Significant software engineering experience with demonstrated machine learning expertise",
+    "Comfortable navigating ambiguity and developing solutions in rapidly evolving research environments",
+    "Ability to work independently while maintaining strong collaboration with cross-functional teams",
+    "Results-oriented, with a bias towards flexibility and impact",
+    "Experience with machine learning systems, data pipelines, or ML infrastructure",
+    "Proficiency in Python and familiarity with modern ML development practices",
+    "Strong analytical skills and ability to evaluate the impact of engineering changes on research outcomes",
+    "Willingness to pick up slack, even if it goes outside your job description",
+    "Enjoy pair programming",
+    "Care about the societal impacts of your work and commitment to developing AI responsibly"
   ],
   "preferred_qualifications": [
-    "Experience with PyTorch internals",
-    "GPU optimization"
+    "Experience working with machine learning data processing pipelines",
+    "Building or optimizing data encodings for ML applications",
+    "Implementing or working with BPE, WordPiece, or other tokenization algorithms",
+    "Performance optimization of ML data processing systems",
+    "Multi-language tokenization challenges and solutions",
+    "Research environments where engineering directly enables scientific progress",
+    "Distributed systems and parallel computing for ML workflows",
+    "Experience with large language models or other transformer-based architectures"
   ],
   "responsibilities": [
-    "Build tools for ML researchers",
-    "Optimize training pipelines"
+    "Design, develop, and maintain tokenization systems used across Pretraining and Finetuning workflows",
+    "Optimize encoding techniques to improve model training efficiency and performance",
+    "Collaborate closely with research teams to understand their evolving needs around data representation",
+    "Build infrastructure that enables researchers to experiment with novel tokenization approaches",
+    "Implement systems for monitoring and debugging tokenization-related issues in the model training pipeline",
+    "Create robust testing frameworks to validate tokenization systems across diverse languages and data types",
+    "Identify and address bottlenecks in data processing pipelines related to tokenization",
+    "Document systems thoroughly and communicate technical decisions clearly to stakeholders across teams"
   ],
-  "visa_sponsorship": null,
-  "education": "BS/MS in CS or related",
-  "experience_years": "3+",
+  "visa_sponsorship": true,
+  "education": "At least a Bachelor's degree in a related field or equivalent experience",
+  "experience_years": "Significant software engineering experience",
   "tech_stack": [
     "Python",
-    "C++",
-    "PyTorch",
-    "CUDA",
-    "Kubernetes"
-  ],
-  "source_url": "https://job-boards.greenhouse.io/anthropic/jobs/4952079008"
+    "BPE",
+    "WordPiece",
+    "Tokenization algorithms",
+    "Machine learning systems",
+    "Data pipelines",
+    "ML infrastructure",
+    "Distributed systems",
+    "Parallel computing",
+    "Large language models",
+    "Transformer-based architectures"
+  ]
 }

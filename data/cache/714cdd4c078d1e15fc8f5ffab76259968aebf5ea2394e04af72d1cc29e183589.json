@@ -1,0 +1,56 @@
+{
+  "title": "Space Force Software Engineer",
+  "company": "Randstad",
+  "location": "Scottsdale, Arizona (Telecommute)",
+  "salary_range": "$68 - $70 per hour",
+  "required_qualifications": [
+    "Bachelor's degree in Software Engineering, or a related Science, Engineering, Technology or Mathematics field",
+    "5+ years of job-related experience",
+    "OR a Master's degree plus 3 years of job-related experience"
+  ],
+  "preferred_qualifications": [
+    "Agile experience",
+    "Proficiency in Python and Java",
+    "Strong understanding of API design, testing, development, and management",
+    "Familiarity with Scaled Agile methodology and best practices",
+    "Knowledge of DevOps principles (CI/CD pipelines, GitOps, automation, configuration management, infrastructure as code)",
+    "Experience with AWS (AWS Solutions Architect preferred), Azure is a plus",
+    "Familiarity with containerization tools such as Docker and Kubernetes",
+    "Understanding of security best practices (risk, compliance, vulnerability management, encryption, PKI, incident response, auditing, and monitoring)",
+    "Strong ability to work effectively with development, operations, and security teams",
+    "Excellent problem-solving and analytical skills",
+    "Proficient in generating documentation and sharing knowledge",
+    "Experience with prompt engineering and AI tools"
+  ],
+  "responsibilities": [
+    "Develop and deploy state-of-the-art ground operational systems",
+    "Work as an integral part of a cross-functional team for the SDA (Space Development Agency) GMI (Ground Management & Integration) program",
+    "Contribute to the success and innovation of the program"
+  ],
+  "visa_sponsorship": null,
+  "education": "Bachelor's degree in Software Engineering, or a related Science, Engineering, Technology or Mathematics field (or Master's degree)",
+  "experience_years": "5+ years (with Bachelor's) or 3+ years (with Master's)",
+  "tech_stack": [
+    "Python",
+    "Java",
+    "GitLab",
+    "Nexus Managed Artifacts",
+    "Ansible",
+    "Terragrunt",
+    "ArgoCD",
+    "VS Code",
+    "Maven",
+    "AWS (EKS, EC2, Lambda, S3, EBS/EFS, VPC, DNS, IAM, KMS, CloudWatch, CloudTrail)",
+    "Kubernetes",
+    "Docker",
+    "ACAS",
+    "Grype",
+    "SIEM (Splunk)",
+    "Prometheus",
+    "Grafana",
+    "ELK Stack (Elasticsearch, Logstash, Kibana)",
+    "Git",
+    "Jira",
+    "Confluence"
+  ]
+}

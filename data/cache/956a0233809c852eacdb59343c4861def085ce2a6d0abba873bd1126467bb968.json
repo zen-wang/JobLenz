@@ -1,0 +1,44 @@
+{
+  "title": "ML/Research Engineer, Safeguards",
+  "company": "Anthropic",
+  "location": "San Francisco, CA | New York City, NY",
+  "salary_range": "$350,000 - $500,000 USD",
+  "required_qualifications": [
+    "Have 4+ years of experience in ML engineering, research engineering, or applied research, in academia or industry",
+    "Have proficiency in Python and experience building ML systems",
+    "Are comfortable working across the research-to-deployment pipeline, from exploratory experiments to production systems",
+    "Are worried about misuse risks of AI systems, and want to work to mitigate them",
+    "Have strong communication skills and ability to explain complex technical concepts to non-technical stakeholders"
+  ],
+  "preferred_qualifications": [
+    "Language modeling and transformers",
+    "Building classifiers, anomaly detection systems, or behavioral ML",
+    "Adversarial machine learning or red-teaming",
+    "Interpretability or probes",
+    "Reinforcement learning",
+    "High-performance, large-scale ML systems"
+  ],
+  "responsibilities": [
+    "Develop classifiers to detect misuse and anomalous behavior at scale. This includes developing synthetic data pipelines for training classifiers and methods to automatically source representative evaluations to iterate on",
+    "Build systems to monitor for harms that span multiple exchanges, such as coordinated cyber attacks and influence operations, and develop new methods for aggregating and analyzing signals across contexts",
+    "Evaluate and improve the safety of agentic products—developing both threat models and environments to test for agentic risks, and developing and deploying mitigations for prompt injection attacks",
+    "Conduct research on automated red-teaming, adversarial robustness, and other research that helps test for or find misuse"
+  ],
+  "visa_sponsorship": true,
+  "education": "At least a Bachelor's degree in a related field or equivalent experience",
+  "experience_years": "4+",
+  "tech_stack": [
+    "Python",
+    "ML systems",
+    "Language modeling",
+    "Transformers",
+    "Classifiers",
+    "Anomaly detection",
+    "Behavioral ML",
+    "Adversarial machine learning",
+    "Red-teaming",
+    "Interpretability",
+    "Probes",
+    "Reinforcement learning"
+  ]
+}

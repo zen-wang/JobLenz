@@ -1,0 +1,34 @@
+{
+  "title": "Machine Learning Engineer II, AGI Customization",
+  "company": "Amazon.com Services LLC",
+  "location": "USA, MA, Boston",
+  "salary_range": "143,700.00 - 194,400.00 USD annually",
+  "required_qualifications": [
+    "3+ years of non-internship professional software development experience",
+    "2+ years of non-internship design or architecture (design patterns, reliability and scaling) of new and existing systems experience",
+    "Experience programming with at least one software programming language"
+  ],
+  "preferred_qualifications": [
+    "3+ years of full software development life cycle, including coding standards, code reviews, source control management, build processes, testing, and operations experience",
+    "Bachelor's degree in computer science or equivalent"
+  ],
+  "responsibilities": [
+    "Leading the development of novel LLM training techniques and optimizations to advance the state of LLMs",
+    "Collaborate closely with Applied Scientists and leverage Amazon's heterogeneous data sources and large-scale computing resources to accelerate development of multimodal Large Language Models and Generative Artificial Intelligence solutions",
+    "Build customization capabilities such as fine tuning, distillation, model evaluation, prompt optimization, etc.",
+    "Creating reliable, scalable, and high performance AI products",
+    "Delivering high quality technology products/services in a hyper-growth environment"
+  ],
+  "visa_sponsorship": null,
+  "education": "Bachelor's degree in computer science or equivalent (preferred)",
+  "experience_years": "3+ years of professional software development experience, 2+ years of design or architecture experience",
+  "tech_stack": [
+    "LLM (Large Language Models)",
+    "Generative AI",
+    "Machine Learning",
+    "Fine tuning",
+    "Distillation",
+    "Model evaluation",
+    "Prompt optimization"
+  ]
+}

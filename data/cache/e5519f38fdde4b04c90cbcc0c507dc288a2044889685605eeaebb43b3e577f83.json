@@ -1,0 +1,37 @@
+{
+  "title": "Machine Learning Engineer, XLS, Compiler",
+  "company": "Google",
+  "location": "Chicago, IL, USA",
+  "salary_range": "$174,000-$252,000 + bonus + equity + benefits",
+  "required_qualifications": [
+    "Bachelor’s degree or equivalent practical experience",
+    "5 years of experience with software development in C++",
+    "3 years of experience testing, maintaining, or launching software products, and 1 year of experience with software design and architecture",
+    "3 years of experience with ML infrastructure (e.g., model deployment, model evaluation, optimization, data processing, debugging)",
+    "Experience in compiler construction"
+  ],
+  "preferred_qualifications": [
+    "Master's degree or PhD in Computer Science or a related technical field",
+    "5 years of experience with data structures and algorithms",
+    "1 year of experience in a technical leadership role",
+    "Experience with SystemVerilog"
+  ],
+  "responsibilities": [
+    "Triage product or system issues and debug, track, and resolve them by analyzing the sources of issues and the impact on hardware, network, or service operations and quality",
+    "Design and implement solutions in one or more specialized machine learning (ML) areas, leverage ML infrastructure, and demonstrate expertise in a chosen field",
+    "Deliver better hardware and higher velocity for hardware development to Google semiconductor teams",
+    "Produce improvements to the Accelerated Language for synthesis compiler",
+    "Work in Google infrastructure (including Vizier, Flume, and others) to use artificial intelligence and machine learning to better search the space of potential hardware"
+  ],
+  "visa_sponsorship": null,
+  "education": "Bachelor's degree or equivalent practical experience",
+  "experience_years": "5 years of experience with software development in C++; 3 years of experience testing, maintaining, or launching software products; 3 years of experience with ML infrastructure",
+  "tech_stack": [
+    "C++",
+    "ML infrastructure",
+    "Compiler construction",
+    "SystemVerilog",
+    "Vizier",
+    "Flume"
+  ]
+}

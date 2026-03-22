@@ -1,0 +1,37 @@
+{
+  "title": "Machine Learning Research Engineer",
+  "company": "Apple",
+  "location": "San Diego, California, United States",
+  "salary_range": "$139,500 - $258,100",
+  "required_qualifications": [
+    "Masters in Computer Science, Machine Learning or related field",
+    "Demonstrated expertise in computer vision, natural language processing, and machine learning with a passion for data-centric machine learning.",
+    "Deep understanding and expertise in foundation models.",
+    "Familiarity with emerging trends in generative AI and multi-modal LLM.",
+    "Strong programming skills and hands-on experience using the following languages or deep learning frameworks: Python, PyTorch, or Jax."
+  ],
+  "preferred_qualifications": [
+    "Familiarity with end-to-end Machine Learning Lifecycle",
+    "Demonstrated evidence of prior experience and expertise in data-centric machine learning research",
+    "Strong problem-solving and communication skills",
+    "Experience with recent post-training methodologies including reinforcement learning",
+    "Ph.D in Machine Learning, Natural Language Processing, Computer Vision, Data Science, Statistics or related areas"
+  ],
+  "responsibilities": [
+    "Design and development of a comprehensive data selection, curation and annotation framework for foundation models at Apple.",
+    "Build evaluation benchmarks and evaluation methodologies to measure capabilities of existing models.",
+    "Work on data curation pipelines to hillclimb on benchmarks.",
+    "Develop training frameworks for fine-tuning Foundation Models."
+  ],
+  "visa_sponsorship": null,
+  "education": "Masters in Computer Science, Machine Learning or related field (Ph.D. preferred)",
+  "experience_years": "Not specified (Summary mentions 'experienced')",
+  "tech_stack": [
+    "Python",
+    "PyTorch",
+    "Jax",
+    "Foundation Models",
+    "Large Language Models (LLM)",
+    "Generative AI"
+  ]
+}

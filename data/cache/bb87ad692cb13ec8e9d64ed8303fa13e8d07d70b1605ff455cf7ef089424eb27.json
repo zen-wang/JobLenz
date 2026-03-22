@@ -1,0 +1,30 @@
+{
+  "title": "Machine Learning Engineer",
+  "company": "Apple",
+  "location": "Cupertino, California, United States",
+  "salary_range": "$147,400 - $272,100",
+  "required_qualifications": [
+    "BS and a minimum of 3 years relevant industry experience",
+    "Hands on experience on image/video processing, machine learning and computer vision",
+    "Programming skills in Python, Java, or C/C++"
+  ],
+  "preferred_qualifications": [
+    "PhD degree in Machine Learning, Computer Science, Electrical/Computer Engineering, or related fields",
+    "Project experience on low level computer vision algorithms such as spatial/temporal filtering, image enhancement, or video analysis",
+    "Publication record in top tier conferences (e.g., CVPR, ICCV, ICIP, SIGGRAPH, etc)",
+    "Excellent written and oral communication skills"
+  ],
+  "responsibilities": [
+    "Develop, implement, and optimize machine learning based video processing algorithms",
+    "Contribute to data collection, curation, analysis and processing for algorithm training and evaluation",
+    "Research and evaluate state-of-the-art learning-based methods for low-level vision tasks"
+  ],
+  "visa_sponsorship": null,
+  "education": "BS (Minimum); PhD (Preferred)",
+  "experience_years": "3+",
+  "tech_stack": [
+    "Python",
+    "Java",
+    "C/C++"
+  ]
+}

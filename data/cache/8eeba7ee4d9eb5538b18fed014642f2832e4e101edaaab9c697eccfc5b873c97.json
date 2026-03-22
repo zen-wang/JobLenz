@@ -1,0 +1,38 @@
+{
+  "title": "Machine Learning Engineer, OIS-Core Engine",
+  "company": "Amazon.com Services LLC",
+  "location": "Austin, TX, USA",
+  "salary_range": "143,700.00 - 194,400.00 USD annually",
+  "required_qualifications": [
+    "3+ years of non-internship professional software development experience",
+    "2+ years of non-internship design or architecture (design patterns, reliability and scaling) of new and existing systems experience",
+    "1+ years of software development engineer or related occupational experience",
+    "1+ years of designing and developing large-scale, multi-tiered, multi-threaded, embedded or distributed software applications, tools, systems, and services using: C#, C++, Java, or Perl experience",
+    "1+ years of Object Oriented Design experience",
+    "Bachelor's degree or foreign equivalent in Computer Science, Engineering, Mathematics, or a related field",
+    "Experience programming with at least one software programming language"
+  ],
+  "preferred_qualifications": [
+    "3+ years of full software development life cycle, including coding standards, code reviews, source control management, build processes, testing, and operations experience",
+    "Bachelor's degree in computer science or equivalent"
+  ],
+  "responsibilities": [
+    "Solve complex technical problems, often ones not solved before, at every layer of the stack.",
+    "Design, implement, test, deploy and maintain innovative ML solutions to transform service performance, durability, cost, and security.",
+    "Build high-impact ML solutions to deliver to our large customer base.",
+    "Build high-quality, highly available, always-on products.",
+    "Research implementations that deliver the best possible experiences for customers.",
+    "Participate in design discussions, code review, and communicate with internal and external stakeholders.",
+    "Work cross-functionally to help drive business solutions with your technical input.",
+    "Work in a startup-like development environment, where you're always working on the most important stuff."
+  ],
+  "visa_sponsorship": null,
+  "education": "Bachelor's degree or foreign equivalent in Computer Science, Engineering, Mathematics, or a related field",
+  "experience_years": "3+",
+  "tech_stack": [
+    "C#",
+    "C++",
+    "Java",
+    "Perl"
+  ]
+}

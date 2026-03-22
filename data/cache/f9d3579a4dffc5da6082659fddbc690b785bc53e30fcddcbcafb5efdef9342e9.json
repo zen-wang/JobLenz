@@ -1,0 +1,47 @@
+{
+  "title": "Research Engineer, Machine Learning (Reinforcement Learning)",
+  "company": "Anthropic",
+  "location": "San Francisco, CA | New York City, NY",
+  "salary_range": "$500,000 - $850,000 USD",
+  "required_qualifications": [
+    "Proficient in Python and async/concurrent programming with frameworks like Trio",
+    "Experience with machine learning frameworks (PyTorch, TensorFlow, JAX)",
+    "Industry experience in machine learning research",
+    "Ability to balance research exploration with engineering implementation",
+    "Enjoyment of pair programming",
+    "Care about code quality, testing, and performance",
+    "Strong systems design and communication skills",
+    "Passion for the potential impact of AI and commitment to developing safe and beneficial systems"
+  ],
+  "preferred_qualifications": [
+    "Familiarity with LLM architectures and training methodologies",
+    "Experience with reinforcement learning techniques and environments",
+    "Experience with virtualization and sandboxed code execution environments",
+    "Experience with Kubernetes",
+    "Experience with distributed systems or high-performance computing",
+    "Experience with Rust and/or C++"
+  ],
+  "responsibilities": [
+    "Collaborate with researchers and engineers to advance the capabilities and safety of large language models",
+    "Blend research and engineering responsibilities",
+    "Implement novel approaches",
+    "Contribute to research direction",
+    "Work on fundamental reinforcement learning research",
+    "Create 'agentic' models via tool use for open-ended tasks",
+    "Improve reasoning abilities",
+    "Develop prototypes"
+  ],
+  "visa_sponsorship": true,
+  "education": "Bachelor's degree in a related field or equivalent experience",
+  "experience_years": null,
+  "tech_stack": [
+    "Python",
+    "Trio",
+    "PyTorch",
+    "TensorFlow",
+    "JAX",
+    "Kubernetes",
+    "Rust",
+    "C++"
+  ]
+}

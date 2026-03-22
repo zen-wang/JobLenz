@@ -1,0 +1,39 @@
+{
+  "title": "Senior Machine Learning Engineer, Performance",
+  "company": "Google",
+  "location": "Sunnyvale, CA, USA",
+  "salary_range": "$174,000-$252,000 + bonus + equity + benefits",
+  "required_qualifications": [
+    "Bachelor's degree or equivalent practical experience.",
+    "5 years of experience with software development in one or more programming languages.",
+    "3 years of experience testing, maintaining, or launching software products, and 1 year of experience with software design and architecture.",
+    "3 years of experience with performance, large-scale systems data analysis, visualization tools, or debugging."
+  ],
+  "preferred_qualifications": [
+    "Master's degree or PhD in Computer Science or a related technical field.",
+    "5 years of experience with data structures and algorithms.",
+    "1 year of experience in a technical leadership role.",
+    "Experience developing accessible technologies."
+  ],
+  "responsibilities": [
+    "Analyze performance and efficiency metrics to identify bottlenecks.",
+    "Engage with Google product teams, Cloud, researchers to solve their performance problems.",
+    "Apply parallelization and optimization techniques, such as sharding, quantization, and sparsity, to improve model performance while meeting pre-defined quality characteristics.",
+    "Analyze and debug performance."
+  ],
+  "visa_sponsorship": null,
+  "education": "Bachelor's degree or equivalent practical experience.",
+  "experience_years": "5",
+  "tech_stack": [
+    "TPUs",
+    "DeepSeek",
+    "Qwen",
+    "Gemini",
+    "Gemma",
+    "compilers",
+    "hardware design",
+    "sharding",
+    "quantization",
+    "sparsity"
+  ]
+}

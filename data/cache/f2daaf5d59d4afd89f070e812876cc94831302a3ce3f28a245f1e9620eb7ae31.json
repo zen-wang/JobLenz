@@ -1,0 +1,35 @@
+{
+  "title": "Machine Learning Engineer",
+  "company": "Apple",
+  "location": "Sunnyvale, California, United States",
+  "salary_range": "$181,100 - $318,400",
+  "required_qualifications": [
+    "Software engineering skills and proficiency in Python",
+    "Experience with PyTorch",
+    "Independent problem solving skills",
+    "BS degree and 10+ years of experience"
+  ],
+  "preferred_qualifications": [
+    "Passion for delivering high quality features to large groups of diverse end-users",
+    "Excellent communication and experience working with multi-functional teams",
+    "Self-motivated with proven track record to optimally prioritize and deliver tasks on schedule",
+    "MS degree in computer vision, computer graphics, machine learning or related field",
+    "PhD in computer vision, computer graphics, machine learning, computer science, computer engineering or related fields"
+  ],
+  "responsibilities": [
+    "Discover and build solutions to previously-unsolved challenges in human representation and motion",
+    "Develop ML models for computer vision and graphics applications",
+    "Participate in the whole ML cycle from data collection design and data processing to model design and experiments to validation and QA in the wild",
+    "Perform applied research development to adapt state-of-the-art methods or implement new methods to ship features on visionOS and iOS platforms",
+    "Work closely with other ML engineers as well as data and software engineers both internally and multi-functionally"
+  ],
+  "visa_sponsorship": null,
+  "education": "BS degree required; MS or PhD in computer vision, computer graphics, machine learning, computer science, computer engineering or related fields preferred",
+  "experience_years": "10+",
+  "tech_stack": [
+    "Python",
+    "PyTorch",
+    "visionOS",
+    "iOS"
+  ]
+}

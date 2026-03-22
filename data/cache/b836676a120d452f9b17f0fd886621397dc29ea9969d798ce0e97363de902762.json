@@ -1,0 +1,39 @@
+{
+  "title": "Machine Learning Engineer, YouTube Live Discovery",
+  "company": "Google",
+  "location": "Mountain View, CA, USA",
+  "salary_range": "$207,000-$300,000 + bonus + equity + benefits",
+  "required_qualifications": [
+    "Bachelor's degree or equivalent practical experience.",
+    "8 years of experience with software development in one or more programming languages (e.g., Python, C, C++, Java, JavaScript).",
+    "3 years of experience in a technical leadership role."
+  ],
+  "preferred_qualifications": [
+    "Master's degree or PhD in Computer Science or related technical field.",
+    "3 years of experience working in a complex, matrixed organization.",
+    "3 years of experience with ML classification systems, ranking and recommendation systems or similar.",
+    "Experience in computer vision/NLP/ML/data mining areas."
+  ],
+  "responsibilities": [
+    "Work on improving ML algorithms and end-to-end solutions to empower live recommendations and to grow live ecosystems responsibly.",
+    "Set up growth metrics and goals, do the analysis and research to identify the growth areas and lead a team of engineers to iterate multiple experiments.",
+    "Communicate across multiple YouTube engineering teams and lead to align with the design direction and future plan of your projects.",
+    "Work closely with the YouTube discovery teams (Home/WatchNext/Notifications/Living Room/etc), Live infra and experience teams, collaborate closely with Google Deepmind teams, YouTube knowledge and YouTube (TnS) Trust and Safety."
+  ],
+  "visa_sponsorship": null,
+  "education": "Bachelor's degree or equivalent practical experience",
+  "experience_years": "8",
+  "tech_stack": [
+    "Python",
+    "C",
+    "C++",
+    "Java",
+    "JavaScript",
+    "ML algorithms",
+    "ML classification systems",
+    "ranking and recommendation systems",
+    "computer vision",
+    "NLP",
+    "data mining"
+  ]
+}

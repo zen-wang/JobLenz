@@ -1,0 +1,37 @@
+{
+  "title": "Machine Learning Engineer",
+  "company": "Apple",
+  "location": "Cupertino, California, United States",
+  "salary_range": "$147,400 - $272,100",
+  "required_qualifications": [
+    "MS, PhD, or 5+ years experience in machine learning, computer science, or related fields",
+    "Professional experience creating and experimenting with machine learning models, preferably with time series data",
+    "Strong proficiency in Python, machine learning tools and frameworks e.g. PyTorch, TensorFlow"
+  ],
+  "preferred_qualifications": [
+    "Results-oriented with a proven ability to effectively prioritize and deliver tasks on schedule",
+    "Excellent communication and collaboration skills",
+    "Strong product sense, including the ability to balance technical feasibility with user experience",
+    "Experience developing for embedded or real-time systems",
+    "Experience leveraging distributed compute/storage models when the scale of data calls for it",
+    "Experience designing and implementing interfaces between algorithms, software, and firmware",
+    "Experience with multi-modal inputs and models, including IMU, images, video, and/or audio"
+  ],
+  "responsibilities": [
+    "Designing and driving end to end features with specialists across the company",
+    "Developing machine learning data pipelines for training and testing",
+    "Deploying efficient, low-power models & algorithms",
+    "Delivering the software through prototyping and release to our customers",
+    "Working closely with scientists, software engineers, quality engineers, project managers, and designers throughout a product lifecycle, driving for the best possible customer experience"
+  ],
+  "visa_sponsorship": null,
+  "education": "MS or PhD in machine learning, computer science, or related fields",
+  "experience_years": "5+",
+  "tech_stack": [
+    "Python",
+    "PyTorch",
+    "TensorFlow",
+    "IMU",
+    "sensor fusion"
+  ]
+}

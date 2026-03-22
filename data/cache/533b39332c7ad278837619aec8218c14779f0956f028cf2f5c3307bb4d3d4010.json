@@ -1,0 +1,40 @@
+{
+  "title": "Applied Safety Research Engineer, Safeguards",
+  "company": "Anthropic",
+  "location": "San Francisco, CA",
+  "salary_range": "$320,000 - $405,000 USD",
+  "required_qualifications": [
+    "4+ years of software engineering or ML engineering experience",
+    "proficiency in Python and comfort working across the stack",
+    "experience building and maintaining data pipelines",
+    "comfort with data analysis and ability to draw insights from large datasets",
+    "experience with LLMs and understanding of their capabilities and failure modes",
+    "ability to move fluidly between prototyping and production-quality code",
+    "excitement by ambiguous problems and ability to translate them into concrete experiments",
+    "deep care about AI safety and desire for work to have real impact"
+  ],
+  "preferred_qualifications": [
+    "Red teaming, adversarial testing, or jailbreak research on AI systems",
+    "building or contributing to LLM evaluation frameworks or benchmarks",
+    "trust and safety, content moderation, or abuse detection systems",
+    "synthetic data generation or data augmentation",
+    "distributed systems or large-scale data processing",
+    "prompt engineering or LLM application development"
+  ],
+  "responsibilities": [
+    "Design and run experiments to improve evaluation quality—developing methods to generate representative test data, simulate realistic user behavior, and validate grading accuracy",
+    "Research how different factors (multi-turn conversations, tools, long context, user diversity) impact model safety behavior",
+    "Analyze evaluation coverage to identify gaps and inform where we need better measurement",
+    "Productionize successful research into evaluation pipelines that run during model training, launch and beyond",
+    "Collaborate with Policy and Enforcement to translate real-world harm patterns into measurable evaluations",
+    "Build tooling that enables policy experts to create and iterate on evaluations",
+    "Surface findings to research and training teams to drive upstream model improvements"
+  ],
+  "visa_sponsorship": true,
+  "education": "Bachelor's degree in a related field or equivalent experience",
+  "experience_years": "4+",
+  "tech_stack": [
+    "Python",
+    "LLMs"
+  ]
+}

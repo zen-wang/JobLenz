@@ -1,0 +1,43 @@
+{
+  "title": "Machine Learning Engineer, OIS-Core Engine",
+  "company": "Amazon.com Services LLC",
+  "location": "Austin, TX, USA",
+  "salary_range": "143,700.00 - 194,400.00 USD annually",
+  "required_qualifications": [
+    "3+ years of non-internship professional software development experience",
+    "2+ years of non-internship design or architecture experience",
+    "1+ years of software development engineer or related occupational experience",
+    "1+ years of designing and developing large-scale, multi-tiered, multi-threaded, embedded or distributed software applications, tools, systems, and services using C#, C++, Java, or Perl",
+    "1+ years of Object Oriented Design experience",
+    "Bachelor's degree or foreign equivalent in Computer Science, Engineering, Mathematics, or a related field",
+    "Experience programming with at least one software programming language"
+  ],
+  "preferred_qualifications": [
+    "3+ years of full software development life cycle experience (coding standards, code reviews, source control management, build processes, testing, and operations)",
+    "Bachelor's degree in computer science or equivalent"
+  ],
+  "responsibilities": [
+    "Decomposing challenging problems to develop machine learning (ML) products",
+    "Identifying, defining, and building ML software solutions",
+    "Partnering across diverse teams",
+    "Solving complex technical problems",
+    "Designing, implementing, testing, deploying and maintaining innovative ML solutions",
+    "Building high-impact ML solutions",
+    "Building high-quality, highly available, always-on products",
+    "Researching implementations",
+    "Participating in design discussions, code review, and communicating with internal and external stakeholders",
+    "Working cross-functionally to drive business solutions",
+    "Working in a startup-like development environment"
+  ],
+  "visa_sponsorship": null,
+  "education": "Bachelor's degree or foreign equivalent in Computer Science, Engineering, Mathematics, or a related field",
+  "experience_years": "3+",
+  "tech_stack": [
+    "C#",
+    "C++",
+    "Java",
+    "Perl",
+    "Machine Learning (ML)",
+    "Generative AI"
+  ]
+}

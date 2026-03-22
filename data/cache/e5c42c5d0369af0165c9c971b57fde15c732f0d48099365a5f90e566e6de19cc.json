@@ -1,0 +1,52 @@
+{
+  "title": "Design Engineer, AI Capability Development (Education Labs)",
+  "company": "Anthropic",
+  "location": "San Francisco, CA | New York City, NY",
+  "salary_range": "$300,000 - $405,000 USD",
+  "required_qualifications": [
+    "6+ years building and shipping web products, with deep expertise across the stack",
+    "Strong front-end craft: TypeScript/JavaScript, React, CSS—with an eye for interaction design, motion, and visual detail",
+    "Solid back-end and data pipeline experience: Python, API design, analytics infrastructure",
+    "A portfolio showcasing innovative interaction designs and high-quality implementations",
+    "Track record of independently driving features from prototype to production",
+    "Strong perspective on how technology should enhance human capabilities rather than diminish them",
+    "Experience or genuine passion for skill development, HCI, developer tools, or products that help people become more capable",
+    "Skepticism of purely engagement-driven metrics; interest in measuring capability outcomes",
+    "Comfort with ambiguity and exploring undefined problem spaces",
+    "Ability to rapidly prototype, test with users, and iterate toward production",
+    "Strong instincts for product design and user experience, even without formal design training",
+    "Experience setting vision, shaping team strategy, and building conviction across cross-functional stakeholders",
+    "Ability to build productive relationships with Product, Design, Research, and Engineering teams—especially when your team isn't the owner",
+    "Strong sense of prioritization—knowing what to build now, what to defer, and what to cut",
+    "Track record of influencing roadmaps and decisions beyond your immediate team"
+  ],
+  "preferred_qualifications": [
+    "Experience in developer tools, creative tools, learning platforms, or other products where user skill development and mastery matter more than time-on-site",
+    "Background in learning sciences, cognitive science, HCI, skill acquisition research, or educational psychology (formal or self-directed)",
+    "Experience with experimentation frameworks, A/B testing, or analytics that measure capability development in production",
+    "Previous experience in research labs, frontier tech companies, or startups with high autonomy and ambiguity",
+    "Published writing, talks, or open-source work on skill development, human-AI interaction, or product philosophy",
+    "Experience building AI-native product experiences or working with LLMs in production contexts"
+  ],
+  "responsibilities": [
+    "Ship features that help users develop real skill with AI—measuring success by capability growth, not time-on-site",
+    "Architect end-to-end prototypes (front-end and back-end) that test new interaction paradigms, with particular attention to the front-of-the-frontend: motion, polish, and interaction feel",
+    "Define technical direction for the team—establish patterns others can follow",
+    "Build relationships across Product, Design, and Research to influence how skill development principles shape Anthropic's broader product strategy",
+    "Shape team strategy and roadmap—identify the highest-leverage opportunities and build conviction across stakeholders",
+    "Translate research insights about skill development and human-AI collaboration into shipped product through close collaboration with researchers",
+    "Document and share your work through clear writing, prototypes, and presentations that influence thinking across the organization"
+  ],
+  "visa_sponsorship": true,
+  "education": "At least a Bachelor's degree in a related field or equivalent experience.",
+  "experience_years": "6",
+  "tech_stack": [
+    "TypeScript/JavaScript",
+    "React",
+    "CSS",
+    "Python",
+    "API design",
+    "analytics infrastructure",
+    "LLMs"
+  ]
+}

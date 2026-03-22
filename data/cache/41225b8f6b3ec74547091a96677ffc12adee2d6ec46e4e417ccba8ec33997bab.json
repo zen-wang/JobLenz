@@ -1,0 +1,36 @@
+{
+  "title": "Machine Learning Engineer, GenAI, Amazon Connect",
+  "company": "Amazon Development Center U.S., Inc.",
+  "location": "USA, WA, Seattle",
+  "salary_range": "168,100.00 - 227,400.00 USD annually",
+  "required_qualifications": [
+    "5+ years of non-internship professional software development experience",
+    "5+ years of programming with at least one software programming language experience",
+    "5+ years of leading design or architecture (design patterns, reliability and scaling) of new and existing systems experience",
+    "Experience as a mentor, tech lead or leading an engineering team",
+    "Knowledge of Machine Learning and LLM fundamentals, including transformer architecture, training/inference lifecycles, and optimization techniques"
+  ],
+  "preferred_qualifications": [
+    "Bachelor's degree in computer science or equivalent",
+    "5+ years of full software development life cycle, including coding standards, code reviews, source control management, build processes, testing, and operations experience",
+    "Experience in developing and deploying LLMs in production on GPUs, Neuron, TPU or other AI acceleration hardware",
+    "Experience with CUDA kernels or ML/low-level kernels"
+  ],
+  "responsibilities": [
+    "Design, develop, and research machine learning systems end-to-end — building robust ML solutions that translate data science prototypes into production-ready systems that drive real business outcomes.",
+    "Build, host, and maintain production-grade LLM serving and inference infrastructure — delivering high-quality, highly available, always-on AI systems that customers and internal teams can depend on.",
+    "Optimize the full inference stack for performance and cost-efficiency — applying techniques such as model quantization, batching strategies, KV-cache management, and accelerator tuning.",
+    "Partner with cross-functional teams and customers to deeply understand real-world challenges, and iteratively translate requirements into scalable, secure, and cost-effective machine learning solutions on AWS."
+  ],
+  "visa_sponsorship": null,
+  "education": "Bachelor's degree in computer science or equivalent",
+  "experience_years": "5+",
+  "tech_stack": [
+    "LLMs",
+    "GPUs",
+    "Neuron",
+    "TPU",
+    "CUDA kernels",
+    "AWS"
+  ]
+}

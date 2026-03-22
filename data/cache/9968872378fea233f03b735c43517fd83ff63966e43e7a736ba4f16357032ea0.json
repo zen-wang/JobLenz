@@ -1,0 +1,47 @@
+{
+  "title": "Machine Learning Engineer",
+  "company": "Apple",
+  "location": "Cupertino, California, United States",
+  "salary_range": "$181,100 - $272,100",
+  "required_qualifications": [
+    "Bachelors degree",
+    "PhD/MS in Computer Science, Statistics, Applied Math or a related field",
+    "5+ years of industry experience"
+  ],
+  "preferred_qualifications": [
+    "Strong problem-solving skills and the ability to tackle ambiguous, real-world challenges, along with clear communication and collaboration skills",
+    "Experience with modern deep learning frameworks, such as PyTorch or TensorFlow",
+    "Hands-on experience working with transformer-based models, including large language models (e.g., GPT style models or BERT-like architectures)",
+    "Practical experience leveraging LLMs or GenAI models via APIs to create reliable and user-facing features or workflows",
+    "Familiarity with common GenAI tools and frameworks, such as LangChain or similar, with the ability to learn and adapt as the ecosystem evolves",
+    "Solid understanding of foundational ML concepts including supervised, unsupervised and reinforcement learning",
+    "Experience with model deployment pipelines and serving GenAI models in production",
+    "Experience applying modern ML or GenAI techniques in production workflows, including tasks such as Retrieval-Augmented Generation (RAG), structured reasoning, or prompt-based system design",
+    "Experience working in Supply Chain, Operations, or a related field",
+    "Ability to operate independently and lead without authority"
+  ],
+  "responsibilities": [
+    "Partner with business and product teams to identify high-impact opportunities and translate ambiguous requirements into GenAI-powered features and workflows delivered through a shared AI platform and embedded across products",
+    "Design, build, and own end-to-end GenAI capabilities that support both a centralized AI platform and product teams, covering all aspects from prompt and tool design to agent orchestration, retrieval strategies, model selection, and system evaluation",
+    "Develop reliable, scalable, and cost-aware GenAI features in collaboration with platform, data, and application engineering teams, ensuring strong performance, observability, and maintainability in production environments",
+    "Establish evaluation and monitoring strategies for GenAI-driven features, focusing on output quality, correctness, safety, and business relevance through offline benchmarks, automated checks, and human-in-the-loop review",
+    "Develop Text-to-SQL and structured reasoning capabilities that enable natural-language interaction with structured data, ensuring accuracy, security, and alignment with business semantics",
+    "Leverage agentic AI patterns (multi-step reasoning, tool use, planning, memory, feedback loops) to support complex workflows, while establishing guardrails for reliable and predictable behavior",
+    "Communicate trade-offs, system behavior, and limitations clearly to technical and non-technical stakeholders, enabling informed product and business decisions",
+    "Continuously research, prototype, and operationalize emerging GenAI techniques to improve platform capabilities and accelerate adoption across teams"
+  ],
+  "visa_sponsorship": null,
+  "education": "Bachelors degree, PhD/MS in Computer Science, Statistics, Applied Math or a related field",
+  "experience_years": "5+",
+  "tech_stack": [
+    "PyTorch",
+    "TensorFlow",
+    "GPT",
+    "BERT",
+    "LangChain",
+    "LLM",
+    "GenAI",
+    "RAG",
+    "Text-to-SQL"
+  ]
+}

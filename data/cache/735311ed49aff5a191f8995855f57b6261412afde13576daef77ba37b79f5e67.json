@@ -1,0 +1,56 @@
+{
+  "filtered_url": "https://amazon.jobs/en/search?base_query=Machine+Learning+Engineer&loc_query=United+States&type=area&longitude=-77.03196&latitude=38.89036&country=USA",
+  "url_changed": true,
+  "jobs": [
+    {
+      "title": "Machine Learning Engineer, GenAI, Amazon Connect",
+      "url": "https://amazon.jobs/en/jobs/10372624/machine-learning-engineer-genai-amazon-connect",
+      "location": "Seattle, WA, USA"
+    },
+    {
+      "title": "Machine Learning Engineer, OIS-Core Engine",
+      "url": "https://amazon.jobs/en/jobs/3206931/machine-learning-engineer-ois-core-engine",
+      "location": "Austin, TX, USA"
+    },
+    {
+      "title": "Machine Learning Engineer II, AGI Customization",
+      "url": "https://amazon.jobs/en/jobs/3170644/machine-learning-engineer-ii-agi-customization",
+      "location": "Boston, MA, USA"
+    },
+    {
+      "title": "Machine Learning Engineer II, Special Projects",
+      "url": "https://amazon.jobs/en/jobs/3178943/machine-learning-engineer-ii-special-projects",
+      "location": "Seattle, WA, USA"
+    },
+    {
+      "title": "Machine Learning Engineer, AWS Applied AI Solution",
+      "url": "https://amazon.jobs/en/jobs/3197843/machine-learning-engineer-aws-applied-ai-solution",
+      "location": "Seattle, WA, USA"
+    },
+    {
+      "title": "Machine Learning Engineer II, Shopping Conversation Foundation",
+      "url": "https://amazon.jobs/en/jobs/3180408/machine-learning-engineer-ii-shopping-conversation-foundation",
+      "location": "Seattle, WA, USA"
+    },
+    {
+      "title": "Machine Learning Engineer, AWS Neuron Inference, Annapurna ML",
+      "url": "https://amazon.jobs/en/jobs/3147714/machine-learning-engineer-aws-neuron-inference-annapurna-ml",
+      "location": "Seattle, WA, USA"
+    },
+    {
+      "title": "Sr. Machine Learning Engineer, AWS Applied AI Solution",
+      "url": "https://amazon.jobs/en/jobs/3158229/sr-machine-learning-engineer-aws-applied-ai-solution",
+      "location": "Seattle, WA, USA"
+    },
+    {
+      "title": "Machine Learning Engineer III, Sponsored Products Search Sourcing, Amazon Advertising",
+      "url": "https://amazon.jobs/en/jobs/10372481/machine-learning-engineer-iii-sponsored-products-search-sourcing-amazon-advertising",
+      "location": "Seattle, WA, USA"
+    },
+    {
+      "title": "Machine Learning Compiler Engineer, Annapurna Labs",
+      "url": "https://amazon.jobs/en/jobs/3006684/machine-learning-compiler-engineer-annapurna-labs",
+      "location": "Cupertino, CA, USA"
+    }
+  ]
+}

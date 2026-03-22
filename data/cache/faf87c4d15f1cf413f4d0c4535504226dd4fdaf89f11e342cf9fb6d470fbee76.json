@@ -1,0 +1,43 @@
+{
+  "title": "Data Scientist III",
+  "company": "Randstad USA",
+  "location": "North Chicago, Illinois (Remote option)",
+  "salary_range": "$70 - $78.21 per hour",
+  "required_qualifications": [
+    "Bachelor's degree in Statistics, Analytics, Bioinformatics, Data Science, or a related field",
+    "Minimum of 3 years of analytics-related experience specifically within clinical research and the pharmaceutical industry (non-academic)",
+    "Proven proficiency in R programming for statistical analysis",
+    "Expert-level experience with data visualization tools such as Spotfire, Tableau, or Power BI",
+    "Direct experience with Phase II and III clinical trials and clinical data datasets",
+    "Experience performing Risk-Based Quality Management (RBQM) or Risk-Based Monitoring (RBM) activities",
+    "Strong background in stakeholder management and gathering technical requirements in a matrixed organization"
+  ],
+  "preferred_qualifications": [
+    "Master's degree in a quantitative or scientific field",
+    "Advanced proficiency in Python or other statistical packages",
+    "Working knowledge of Machine Learning (ML) and Artificial Intelligence (AI) applications",
+    "Familiarity with Phase I and IV clinical trial processes",
+    "Demonstrated leadership competencies and ability to manage multiple high-priority projects in a fast-paced environment"
+  ],
+  "responsibilities": [
+    "Study management for 13-15 clinical trials",
+    "Stakeholder consultancy",
+    "RBQM implementation",
+    "Advanced visualization",
+    "Algorithm development using R or Python",
+    "Regulatory compliance",
+    "Process innovation using ML/AI"
+  ],
+  "visa_sponsorship": null,
+  "education": "Bachelor's degree",
+  "experience_years": "3",
+  "tech_stack": [
+    "R",
+    "Python",
+    "Spotfire",
+    "Tableau",
+    "Power BI",
+    "Machine Learning (ML)",
+    "Artificial Intelligence (AI)"
+  ]
+}

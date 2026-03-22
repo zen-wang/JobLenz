@@ -1,0 +1,36 @@
+{
+  "title": "Machine Learning Systems Engineer, RL Engineering",
+  "company": "Anthropic",
+  "location": "San Francisco, CA | New York City, NY | Seattle, WA",
+  "salary_range": "$500,000 - $850,000 USD annually",
+  "required_qualifications": [
+    "4+ years of software engineering experience",
+    "Liking to work on systems and tools that make other people more productive",
+    "Being results-oriented with a bias towards flexibility and impact",
+    "Picking up slack even if it goes outside the job description",
+    "Enjoying pair programming",
+    "Wanting to learn more about machine learning research",
+    "Caring about the societal impacts of your work"
+  ],
+  "preferred_qualifications": [
+    "Experience with high performance, large scale distributed systems",
+    "Experience with large scale LLM training",
+    "Experience with Python",
+    "Experience implementing LLM finetuning algorithms such as RLHF"
+  ],
+  "responsibilities": [
+    "Building the cutting-edge systems that train AI models like Claude",
+    "Implementing and improving advanced techniques to create more capable, reliable and steerable AI",
+    "Being responsible for the critical algorithms and infrastructure that researchers depend on to train models",
+    "Improving the performance, robustness, and usability of these systems",
+    "Building, maintaining, and improving the algorithms and systems that finetuning researchers use to train models"
+  ],
+  "visa_sponsorship": true,
+  "education": "Bachelor's degree in a related field or equivalent experience",
+  "experience_years": "4+",
+  "tech_stack": [
+    "Python",
+    "LLM training",
+    "RLHF"
+  ]
+}

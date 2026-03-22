@@ -1,0 +1,44 @@
+{
+  "title": "Machine Learning Engineering Manager - LLM Serving & Infrastructure",
+  "company": "Spotify",
+  "location": "New York, Boston or United States of America (Home Mix)",
+  "salary_range": "$176,166 - $251,666",
+  "required_qualifications": [
+    "5+ years of experience in software or machine learning engineering, with 2+ years of experience managing an engineering team",
+    "Hands-on with ML Engineering: you have deep expertise in building, scaling, and governing high-quality ML systems and datasets, including defining data schemas, handling data lineage, and implementing data validation pipelines (e.g., HuggingFace datasets library or similar internal systems)",
+    "Deep technical background in building and operating large-scale, high-velocity Machine Learning/MLOps infrastructure, ideally for personalization, recommendation, or Large Language Models (LLMs)",
+    "Proven track record to drive complex projects involving multiple partners and federated contribution models (\"one source of truth, many contributors\")",
+    "Expertise in designing robust, loosely coupled systems with clean APIs and clear separation of concerns (e.g., distinguishing between fast dev-time tools and rigorous production-like systems)",
+    "Experience integrating evaluation and testing into continuous integration/continuous deployment (CI/CD) pipelines to enable rapid 'fork-evaluate-merge' developer workflows",
+    "Solid understanding of experiment tracking and results visualization platforms (e.g., MLFlow, custom UIs)",
+    "A pragmatic leader who can balance the need for speed with progressive rigor and production fidelity"
+  ],
+  "preferred_qualifications": [],
+  "responsibilities": [
+    "Lead a high-performing engineering team to develop, build, and deploy a high-scale, low-latency LLM Serving Infrastructure",
+    "Drive the implementation of a unified serving layer to support multiple LLM models and inference types (batch, offline eval flows and real-time/streaming)",
+    "Lead all aspects of the development of the Model Registry for deploying, versioning, and running LLMs across production environments",
+    "Ensure successful integration with the core Personalization and Recommendation systems to deliver LLM-powered features",
+    "Define and champion standardized technical interfaces and protocols for efficient model deployment and scaling",
+    "Establish and monitor the serving infrastructure's performance, cost, and reliability, including load balancing, autoscaling, and failure recovery",
+    "Collaborate closely with data science, machine learning research, and feature teams (Autoplay, Home, Search, etc.) to drive the active adoption of the serving infrastructure",
+    "Scale up the serving architecture to handle hundreds of millions of users and high-volume inference requests for internal domain-specific LLMs",
+    "Drive Latency and Cost Optimization: partner with SRE and ML teams to implement techniques like quantization, pruning, and efficient batching to minimize serving latency and cloud compute costs",
+    "Develop Observability and Monitoring: build dashboards and alerting for service health, tracing, A/B test traffic, and latency trends to ensure consistency to defined SLAs",
+    "Contribute to Core LPM Serving: focus on the technical strategy for deploying and maintaining the core Large Personalization Model (LPM)"
+  ],
+  "visa_sponsorship": null,
+  "education": null,
+  "experience_years": "5+ years in software or machine learning engineering, 2+ years managing an engineering team",
+  "tech_stack": [
+    "LLM",
+    "HuggingFace datasets library",
+    "MLFlow",
+    "MLOps infrastructure",
+    "CI/CD pipelines",
+    "Model Registry",
+    "quantization",
+    "pruning",
+    "efficient batching"
+  ]
+}

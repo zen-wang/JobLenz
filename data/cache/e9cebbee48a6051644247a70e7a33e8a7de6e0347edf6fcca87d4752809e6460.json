@@ -1,0 +1,46 @@
+{
+  "title": "Machine Learning Engineer",
+  "company": "Apple",
+  "location": "Austin Metro Area, Texas, United States; San Francisco Bay Area, California, United States; Cambridge, Massachusetts, United States",
+  "salary_range": "$132,100 - $244,600",
+  "required_qualifications": [
+    "4+ years of related experience building high throughput scalable applications or building machine learning models",
+    "Proficiency in one or more object-oriented programming languages such as Python, Java, C++ and experience building distributed systems",
+    "Experience building data processing pipelines and large scale machine learning systems with experience in big data technologies like Spark, SQL, Snowflake/Hadoop, etc.",
+    "Skilled in communication, problem solving, strategic thinking",
+    "Attention to detail, data accuracy and quality of output"
+  ],
+  "preferred_qualifications": [
+    "PhD or Graduate degree with research/work experience utilizing data science techniques (including but not limited to Computer Science, Statistics, Political Science, Biology, etc) or Bachelor's degree with equivalent experience",
+    "Experience in Search, Recommender Systems, Personalization, Computational Advertising or Natural Language Processing including RAG based Generative AI and transformer architecture",
+    "Skilled in communication, problem solving, critical thinking",
+    "Experience using Deep Learning, Bandits, Probabilistic Graphical Models, or Reinforcement Learning in real applications a plus",
+    "Experience with Spark, TensorFlow, Keras, and PyTorch a plus"
+  ],
+  "responsibilities": [
+    "Collaborate with other MLEs to build scalable, production-ready ML solutions, taking algorithms from initial concept through to deployment",
+    "Contribute to the ongoing improvement of our ML infrastructure and tooling",
+    "Engage in continuous learning and development, staying up-to-date with the latest advances in machine learning and software engineering"
+  ],
+  "visa_sponsorship": null,
+  "education": "PhD or Graduate degree with research/work experience utilizing data science techniques (including but not limited to Computer Science, Statistics, Political Science, Biology, etc) or Bachelor's degree with equivalent experience",
+  "experience_years": "4+",
+  "tech_stack": [
+    "Python",
+    "Java",
+    "C++",
+    "Spark",
+    "SQL",
+    "Snowflake",
+    "Hadoop",
+    "TensorFlow",
+    "Keras",
+    "PyTorch",
+    "Deep Learning",
+    "Bandits",
+    "Probabilistic Graphical Models",
+    "Reinforcement Learning",
+    "RAG",
+    "transformer architecture"
+  ]
+}

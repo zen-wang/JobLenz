@@ -1,0 +1,55 @@
+{
+  "title": "Software Engineer - Rust",
+  "company": "Randstad USA",
+  "location": "McLean, Virginia",
+  "salary_range": "$60 - $75 per hour",
+  "required_qualifications": [
+    "Proficiency in Rust, including async runtimes, ownership, borrowing, lifetimes, and asynchronous programming",
+    "Experience developing and operating production software in Linux-based environments",
+    "Understanding of algorithmic and numerical software development, including performance and correctness considerations",
+    "Understanding of advanced principles of cloud infrastructure providers (Azure, AWS)",
+    "Ability to work in AWS Gov Cloud, or other secure environments (US Citizenship required)",
+    "Expertise with scripting and automation languages (Python, Bash, and similar)",
+    "Understanding of observability concepts such as logging, metrics, and monitoring",
+    "Expertise with version control systems and collaborative development workflows (GitHub)",
+    "Expertise with JIRA, standard agile sprint planning, etc.",
+    "Understanding of Software Defined Radios and how they are used, configured, and tested",
+    "Working knowledge of RF Network and Spectrum Analyzers",
+    "Critical thinking, analytical, and problem-solving skills",
+    "Ability to work independently and collaboratively in a multidisciplinary engineering environment",
+    "Excellent oral and written communication skills, including presenting technical topics to technical and non-technical audiences"
+  ],
+  "preferred_qualifications": [
+    "Related experience or interest in aviation, aerospace, or other regulated industries"
+  ],
+  "responsibilities": [
+    "Design, implement, and maintain production-grade Rust software components and services supporting aviation networks meeting defined reliability, performance and security requirements.",
+    "Translate system and product requirements into well-scoped technical designs for features and subsystems",
+    "Develop math-intensive, algorithmic, and physics-based software, translating theoretical models into efficient and reliable implementations",
+    "Own functionality through the full lifecycle, including design, implementation, deployment, and operational support",
+    "Implement secure software aligned with NIST SP 800-53 / 800-171 and CMMC requirements",
+    "Support aviation software processes aligned with DO-278A concepts",
+    "Support secure software development practices aligned with NIST/CMMC-style controls and applicable aviation standards",
+    "Build software with a focus on commercial readiness, including reliability, fault handling, observability, and maintainability",
+    "Implement logging, metrics, health checks, and diagnostics to support monitoring and troubleshooting in production environments",
+    "Collaborate with systems engineering, RF engineering, network engineering, and operations teams to ensure solutions meet performance and regulatory requirements",
+    "Participate in code reviews, design reviews, test scenario development and execution and technical discussions to improve system quality",
+    "Document designs, assumptions, limitations, and operational behavior to support traceability and audits"
+  ],
+  "visa_sponsorship": false,
+  "education": "Bachelor's degree",
+  "experience_years": "2-5 years",
+  "tech_stack": [
+    "Rust",
+    "Linux",
+    "Azure",
+    "AWS",
+    "AWS Gov Cloud",
+    "Python",
+    "Bash",
+    "GitHub",
+    "JIRA",
+    "Software Defined Radios",
+    "RF Network and Spectrum Analyzers"
+  ]
+}
