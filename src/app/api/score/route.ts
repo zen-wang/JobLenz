@@ -2,18 +2,18 @@ import { NextRequest, NextResponse } from "next/server";
 import { callLLMJson } from "@/lib/llm";
 import { FIT_REPORT_PROMPT } from "@/lib/prompts";
 import {
-  computeDeterministicScores,
+  computeSkillsMatch,
+  computeVisaScore,
   computeOverallScore,
 } from "@/lib/scoring";
 import type {
+  AssessmentDimension,
   CompanyIntel,
-  FitDimension,
-  Evidence,
-  MissingRequirements,
   JobDetails,
   ResumeProfile,
   ScoreResult,
 } from "@/lib/types";
+import type { UserProfile } from "@/lib/profile-types";
 
 interface ScoreRequest {
   enriched_jobs: {
@@ -22,15 +22,14 @@ interface ScoreRequest {
     details: JobDetails | null;
     extraction_status: "success" | "failed";
   }[];
-  company_intel: CompanyIntel;
+  company_intel?: CompanyIntel | null;
   resume_profile: ResumeProfile;
+  user_profile?: UserProfile | null;
 }
 
 interface LLMFitResponse {
-  dimensions: FitDimension[];
-  missing_requirements: MissingRequirements;
-  strengths: Evidence[];
-  concerns: Evidence[];
+  experience_fit: AssessmentDimension;
+  domain_relevance: AssessmentDimension;
   next_steps: string;
 }
 
@@ -44,63 +43,81 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
   }
 
-  const { enriched_jobs, company_intel, resume_profile } = body;
+  const { enriched_jobs, company_intel, resume_profile, user_profile } = body;
 
-  if (!enriched_jobs?.length || !resume_profile || !company_intel) {
+  if (!enriched_jobs?.length || !resume_profile) {
     return NextResponse.json(
-      { error: "enriched_jobs, company_intel, and resume_profile are required" },
+      { error: "enriched_jobs and resume_profile are required" },
       { status: 400 },
     );
   }
 
   try {
-    // Score each job that has details (skip failed extractions)
     const scorable = enriched_jobs.filter(
       (j) => j.extraction_status === "success" && j.details,
     );
 
-    const scored = await Promise.all(
-      scorable.map(async (job) => {
-        // 1. Compute deterministic scores
-        const deterministic = computeDeterministicScores(
-          job.details!,
-          company_intel,
-          resume_profile,
-        );
+    const BATCH_SIZE = 3;
+    const scored: Awaited<ReturnType<typeof scoreJob>>[] = [];
 
-        // 2. Call LLM for qualitative dimensions
-        const userPrompt = buildScoreUserPrompt(
-          job.details!,
-          company_intel,
-          resume_profile,
-        );
+    for (let i = 0; i < scorable.length; i += BATCH_SIZE) {
+      const batch = scorable.slice(i, i + BATCH_SIZE);
+      const batchResults = await Promise.all(batch.map(scoreJob));
+      scored.push(...batchResults);
+    }
 
-        const { data, provider, model, latency_ms } =
-          await callLLMJson<LLMFitResponse>({
-            systemPrompt: FIT_REPORT_PROMPT,
-            userPrompt,
-            maxTokens: 8192,
-          });
+    async function scoreJob(job: (typeof scorable)[number]) {
+      // 1. Deterministic: Skills Match
+      const skills_match = computeSkillsMatch(
+        job.details!,
+        resume_profile,
+        user_profile,
+      );
 
-        // 3. Compute overall score from LLM dimensions + deterministic
-        const overall_score = computeOverallScore(data.dimensions, deterministic);
+      // 2. Deterministic: Visa Compatibility (uses both h1bdata.info + MyVisaJobs)
+      const visa_compatibility = computeVisaScore(
+        company_intel ?? null,
+        job.details!,
+        resume_profile,
+        user_profile,
+      );
 
-        return {
-          url: job.url,
-          title: job.title,
-          overall_score,
-          dimensions: data.dimensions,
-          strengths: data.strengths,
-          concerns: data.concerns,
-          next_steps: data.next_steps,
-          deterministic,
-          missing_requirements: data.missing_requirements,
-          _llm: { provider, model, latency_ms },
-        };
-      }),
-    );
+      // 3. LLM: Experience Fit + Domain Relevance
+      const userPrompt = buildScoreUserPrompt(
+        job.details!,
+        resume_profile,
+        company_intel,
+      );
 
-    // Sort by overall_score descending
+      const { data, provider, model, latency_ms } =
+        await callLLMJson<LLMFitResponse>({
+          systemPrompt: FIT_REPORT_PROMPT,
+          userPrompt,
+          maxTokens: 4096,
+        });
+
+      // 4. Overall score: weighted average
+      const overall_score = computeOverallScore(
+        skills_match,
+        data.experience_fit,
+        visa_compatibility,
+        data.domain_relevance,
+      );
+
+      return {
+        url: job.url,
+        title: job.title,
+        company: job.details!.company,
+        overall_score,
+        skills_match,
+        experience_fit: data.experience_fit,
+        visa_compatibility,
+        domain_relevance: data.domain_relevance,
+        next_steps: data.next_steps,
+        _llm: { provider, model, latency_ms },
+      };
+    }
+
     scored.sort((a, b) => b.overall_score - a.overall_score);
 
     const result: ScoreResult & { llm_metadata: unknown } = {
@@ -126,19 +143,21 @@ export async function POST(req: NextRequest) {
 
 function buildScoreUserPrompt(
   jobDetails: JobDetails,
-  companyIntel: CompanyIntel,
   resumeProfile: ResumeProfile,
+  companyIntel?: CompanyIntel | null,
 ): string {
-  return `## Candidate Resume Profile
-${JSON.stringify(resumeProfile, null, 2)}
+  const sections = [
+    `## Candidate Resume Profile\n${JSON.stringify(resumeProfile, null, 2)}`,
+    `## Job Description\n${JSON.stringify(jobDetails, null, 2)}`,
+  ];
 
-## Job Description
-${JSON.stringify(jobDetails, null, 2)}
+  if (companyIntel?.values?.data) {
+    sections.push(`## Company Info\n${JSON.stringify(companyIntel.values.data, null, 2)}`);
+  }
 
-## Company Intelligence
+  sections.push(
+    "Score Experience Fit and Domain Relevance (0-100 each). Do NOT score Skills Match or Visa.",
+  );
 
-### Company Values (status: ${companyIntel.values.status})
-${companyIntel.values.data ? JSON.stringify(companyIntel.values.data, null, 2) : "DATA UNAVAILABLE — agent failed"}
-
-Generate the fit assessment JSON now. Remember: score ONLY Technical Fit, Experience Alignment, and Culture Alignment. Do NOT include overall_score.`;
+  return sections.join("\n\n");
 }

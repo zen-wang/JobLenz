@@ -3,12 +3,15 @@
 export type DiscoverSSEEvent =
   | { type: "progress"; message: string; sub_stage: string; detail?: string }
   | { type: "result"; data: DiscoverResult }
-  | { type: "error"; message: string };
+  | { type: "error"; message: string }
+  | { type: "streaming_url"; url: string; company: string; slot: number }
+  | { type: "slot_done"; slot: number }
+  | { type: "agent_progress"; message: string };
 
 export interface ScoutResult {
   filtered_url: string;
   url_changed: boolean;
-  jobs: { title: string; url: string; location?: string }[];
+  jobs: { title: string; url: string; location?: string; company?: string }[];
 }
 
 // === Enrichment ===
@@ -38,6 +41,18 @@ export interface H1BData {
   source_url: string;
 }
 
+export interface MyVisaJobsData {
+  company_name: string;
+  lca_filings: number | null;
+  uscis_approvals: number | null;
+  uscis_denials: number | null;
+  approval_rate: string | null;
+  green_card_filings: number | null;
+  avg_salary: string | null;
+  most_recent_year: string | null;
+  source_url: string;
+}
+
 export interface ValuesData {
   mission_statement: string | null;
   stated_values: string[];
@@ -56,6 +71,7 @@ export interface SalaryData {
 
 export interface CompanyIntel {
   h1b: { status: "success" | "failed"; data?: H1BData; latency_ms: number };
+  myvisajobs: { status: "success" | "failed"; data?: MyVisaJobsData; latency_ms: number };
   values: {
     status: "success" | "failed";
     data?: ValuesData;
@@ -104,73 +120,21 @@ export interface FilterStats {
   removed_count: number;
 }
 
-// === Scoring ===
+// === Assessment (4-dimension scoring) ===
 
-export interface FitDimension {
-  name: string;
-  score: number;
+export interface AssessmentDimension {
+  score: number; // 0-100
   reasoning: string;
-  sources: string[];
-  confidence: "high" | "medium" | "low";
-  confidence_reason: string;
-}
-
-export interface Evidence {
-  text: string;
-  evidence: string;
-  source: string;
+  data_points: string[];
 }
 
 export interface FitReport {
-  overall_score: number;
-  dimensions: FitDimension[];
-  strengths: Evidence[];
-  concerns: Evidence[];
+  overall_score: number; // 0-100
+  skills_match: AssessmentDimension;
+  experience_fit: AssessmentDimension;
+  visa_compatibility: AssessmentDimension;
+  domain_relevance: AssessmentDimension;
   next_steps: string;
-}
-
-// === Deterministic Scoring ===
-
-export interface VisaAssessment {
-  status: "sponsor_confirmed" | "sponsor_likely" | "sponsor_unknown" | "not_needed";
-  company_sponsors: boolean | null;
-  candidate_needs_visa: boolean | null;
-  h1b_applications: number | null;
-}
-
-export interface ATSKeywordMatch {
-  match_percentage: number;
-  matched_keywords: string[];
-  missing_keywords: string[];
-}
-
-export interface CompensationAssessment {
-  status: "competitive" | "above_market" | "below_market" | "data_unavailable";
-  job_range: string | null;
-  market_range: string | null;
-}
-
-export interface LocationAssessment {
-  status: "match" | "partial" | "remote" | "unknown";
-}
-
-export interface EducationAssessment {
-  status: "exceeds" | "meets" | "below" | "unknown";
-  required: string | null;
-  candidate: string | null;
-}
-
-export interface DeterministicScores {
-  visa: VisaAssessment;
-  ats_keywords: ATSKeywordMatch;
-  compensation: CompensationAssessment;
-  location: LocationAssessment;
-  education: EducationAssessment;
-}
-
-export interface MissingRequirements {
-  required: string[];
-  preferred: string[];
 }
 
 // === Metrics ===
@@ -215,6 +179,7 @@ export type PipelineStage =
   | "tailoring"
   | "cover_letter"
   | "complete"
+  | "stopped"
   | "error";
 
 export interface PipelineState {
@@ -226,32 +191,43 @@ export interface PipelineState {
   error: string | null;
 }
 
+// === Search Preferences ===
+
+export interface SearchPreferences {
+  positions: string[];
+  location: string;
+  posting_hours?: number;
+  work_authorization?: string;
+  salary_min?: string;
+  salary_max?: string;
+  education_level?: string;
+  experience_years?: string;
+  skip_cache?: boolean;
+  target_companies?: string[];
+}
+
 // === API Request/Response Types ===
 
 export interface DiscoverRequest {
-  company_url: string;
-  role_query: string;
-  location?: string;
+  search_preferences: SearchPreferences;
 }
 
 export interface DiscoverResult {
-  company: {
-    name: string;
-    domain: string;
-    careers_url: string;
+  search_context: {
+    positions: string[];
+    location: string;
+    source: string;
   };
   jobs: {
     title: string;
     url: string;
     location?: string;
+    company?: string;
   }[];
   scout_metadata: {
-    filtered_url: string;
-    url_changed: boolean;
-    method: "scout+scraper" | "scout_only";
+    method: "job_search";
     scout_latency_ms: number;
     scout_steps: number;
-    scraper_latency_ms: number;
     total_jobs_found: number;
     filter_stats?: FilterStats;
   };
@@ -259,9 +235,10 @@ export interface DiscoverResult {
 
 export interface EnrichRequest {
   jobs: { title: string; url: string }[];
-  company_name: string;
-  company_domain: string;
+  company_name?: string;
+  company_domain?: string;
   max_jobs?: number;
+  skip_cache?: boolean;
 }
 
 export interface EnrichResult {
@@ -287,12 +264,12 @@ export interface ScoreResult {
   scored_jobs: {
     url: string;
     title: string;
+    company: string;
     overall_score: number;
-    dimensions: FitDimension[];
-    strengths: Evidence[];
-    concerns: Evidence[];
+    skills_match: AssessmentDimension;
+    experience_fit: AssessmentDimension;
+    visa_compatibility: AssessmentDimension;
+    domain_relevance: AssessmentDimension;
     next_steps: string;
-    deterministic?: DeterministicScores;
-    missing_requirements?: MissingRequirements;
   }[];
 }

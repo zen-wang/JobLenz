@@ -12,7 +12,6 @@ interface Metrics {
 interface ScoutMetadata {
   scout_latency_ms: number;
   scout_steps: number;
-  scraper_latency_ms: number;
   method: string;
   total_jobs_found: number;
   filter_stats?: {
@@ -39,8 +38,8 @@ interface ObservabilityPanelProps {
 function Stat({ label, value }: { label: string; value: string | number }) {
   return (
     <div className="text-center">
-      <div className="text-lg font-bold text-gray-900">{value}</div>
-      <div className="text-[10px] text-gray-500 uppercase tracking-wide">
+      <div className="text-lg font-bold" style={{ color: "var(--text-primary)" }}>{value}</div>
+      <div className="text-[10px] font-label uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>
         {label}
       </div>
     </div>
@@ -62,9 +61,9 @@ export default function ObservabilityPanel({
 
   return (
     <div className="space-y-3">
-      <h3 className="text-sm font-semibold text-gray-900">Pipeline Metrics</h3>
+      <h3 className="text-sm font-semibold" style={{ color: "var(--text-primary)" }}>Pipeline Metrics</h3>
 
-      <div className="border border-gray-200 rounded-lg p-3">
+      <div className="glass-inner p-3">
         <div className="grid grid-cols-3 sm:grid-cols-6 gap-3">
           {scoutMetadata && (
             <>
@@ -80,12 +79,6 @@ export default function ObservabilityPanel({
                     : formatMs(scoutMetadata.scout_latency_ms)
                 }
               />
-              {scoutMetadata.scraper_latency_ms > 0 && (
-                <Stat
-                  label="Scraper"
-                  value={formatMs(scoutMetadata.scraper_latency_ms)}
-                />
-              )}
               {scoutMetadata.filter_stats && (
                 <Stat
                   label="Filter"
@@ -130,24 +123,24 @@ export default function ObservabilityPanel({
         {enrichMetrics &&
           enrichMetrics.sequential_estimate_ms > 0 &&
           enrichMetrics.total_latency_ms > 0 && (
-            <div className="mt-3 pt-3 border-t border-gray-100">
-              <div className="flex items-center gap-2 text-xs text-gray-600">
+            <div className="mt-3 pt-3 border-t border-blue-900/30">
+              <div className="flex items-center gap-2 text-xs" style={{ color: "var(--text-secondary)" }}>
                 <span>Parallel speedup:</span>
-                <span className="font-mono font-medium text-green-700">
+                <span className="font-mono font-medium" style={{ color: "var(--accent-green)" }}>
                   {(
                     enrichMetrics.sequential_estimate_ms /
                     enrichMetrics.total_latency_ms
                   ).toFixed(1)}
                   x
                 </span>
-                <span className="text-gray-400">
-                  ({formatMs(enrichMetrics.sequential_estimate_ms)} sequential vs{" "}
-                  {formatMs(enrichMetrics.total_latency_ms)} parallel)
+                <span style={{ color: "var(--text-muted)" }}>
+                  ({formatMs(enrichMetrics.sequential_estimate_ms)} seq vs{" "}
+                  {formatMs(enrichMetrics.total_latency_ms)} par)
                 </span>
               </div>
               {enrichMetrics.tinyfish_steps_total > 0 && (
-                <div className="text-xs text-gray-500 mt-1">
-                  TinyFish steps consumed: {enrichMetrics.tinyfish_steps_total}
+                <div className="text-xs mt-1" style={{ color: "var(--text-muted)" }}>
+                  TinyFish steps: {enrichMetrics.tinyfish_steps_total}
                 </div>
               )}
             </div>

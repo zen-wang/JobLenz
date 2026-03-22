@@ -16,6 +16,22 @@ export function domainToCompanyName(domain: string): string {
   return name.charAt(0).toUpperCase() + name.slice(1);
 }
 
+/** Slugify a string for use in filenames. */
+export function slugify(text: string): string {
+  return text.toLowerCase().replace(/[^a-z0-9]+/g, "-").slice(0, 40);
+}
+
+/** Download a string as a file via Blob. */
+export function downloadBlob(content: string, filename: string, mimeType: string): void {
+  const blob = new Blob([content], { type: mimeType });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
 /** Normalise a company URL into a careers-page URL if needed. */
 export function normalizeCareersUrl(input: string): string {
   const url = input.startsWith("http") ? input : `https://${input}`;

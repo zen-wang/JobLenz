@@ -1,325 +1,220 @@
 import type {
-  VisaAssessment,
-  ATSKeywordMatch,
-  CompensationAssessment,
-  LocationAssessment,
-  EducationAssessment,
-  DeterministicScores,
-  FitDimension,
+  AssessmentDimension,
+  CompanyIntel,
   JobDetails,
   H1BData,
-  CompanyIntel,
+  MyVisaJobsData,
   ResumeProfile,
-  SalaryData,
 } from "./types";
+import type { UserProfile } from "./profile-types";
 
-// ── Visa ──
+// ── Skills Match (weight: 40%) ── deterministic keyword matching ──
 
-export function assessVisa(
-  h1bData: H1BData | undefined,
+// Common filler words to ignore when extracting tech tokens from JD phrases
+const STOP_WORDS = new Set([
+  // determiners & pronouns
+  "the", "and", "or", "of", "in", "to", "a", "an", "with", "for", "on", "at",
+  "by", "is", "are", "was", "were", "be", "been", "has", "have", "had", "do",
+  "does", "did", "will", "would", "could", "should", "may", "might", "can",
+  "not", "no", "but", "if", "than", "that", "this", "these", "those", "such",
+  "so", "as", "from", "into", "about", "between", "through", "during", "before",
+  "after", "above", "below", "up", "down", "out", "over", "under", "again",
+  "then", "once", "when", "where", "why", "how", "all", "each", "every", "both",
+  "few", "more", "most", "other", "some", "any", "only", "own", "same", "too",
+  "very", "just", "also", "well", "etc", "our", "you", "your", "we", "us",
+  "its", "their", "they", "them", "what", "which", "who", "whom",
+  // JD filler — these inflate token count without being real skills
+  "experience", "strong", "knowledge", "ability", "understanding", "familiarity",
+  "proficiency", "proficient", "years", "year", "work", "working", "required",
+  "preferred", "minimum", "plus", "using", "including", "related", "based",
+  "must", "able", "proven", "track", "record", "skills", "skill", "least",
+  "new", "being", "having", "doing", "like", "good", "great", "excellent",
+  "deep", "across", "within", "ensure", "develop", "support", "provide",
+  "manage", "create", "build", "design", "implement", "maintain", "collaborate",
+  "team", "teams", "role", "position", "join", "help", "lead", "drive",
+  "responsible", "opportunity", "looking", "ideal", "candidate", "qualifications",
+  "requirements", "equivalent", "relevant", "degree", "bachelor", "master",
+  "phd", "computer", "science", "engineering", "technical", "technologies",
+  "environment", "environments", "solutions", "complex", "multiple", "high",
+  "large", "scale", "level", "senior", "junior", "mid", "entry", "staff",
+  "principal", "cross", "functional", "fast", "paced", "hands", "attention",
+  "detail", "problem", "solving", "communication", "written", "verbal",
+  "stakeholders", "business", "product", "products", "company", "customers",
+  "internal", "external", "best", "practices", "industry", "standards",
+]);
+
+/** Extract meaningful tech-like tokens from an array of text strings. */
+function extractTokens(texts: string[]): Set<string> {
+  return new Set(
+    texts
+      .flatMap((s) => s.toLowerCase().split(/[\s,;/()[\]{}<>:•|]+/))
+      .map((s) => s.replace(/[^a-z0-9+#.\-]/g, "").trim())
+      .filter((s) => s.length > 1 && !STOP_WORDS.has(s)),
+  );
+}
+
+export function computeSkillsMatch(
   jobDetails: JobDetails,
   resumeProfile: ResumeProfile,
-): VisaAssessment {
-  const visaStatus = resumeProfile.visa_status;
-  const candidateNeedsVisa = visaStatus != null
-    ? !["us citizen", "citizen", "permanent resident", "green card"].some((s) =>
-        visaStatus.toLowerCase().includes(s),
-      )
-    : null;
+  userProfile?: UserProfile | null,
+): AssessmentDimension {
+  // Extract individual tech tokens from JD (not full phrases)
+  const jdTokens = extractTokens([
+    ...jobDetails.required_qualifications,
+    ...jobDetails.preferred_qualifications,
+    ...jobDetails.tech_stack,
+  ]);
 
-  if (candidateNeedsVisa === false) {
-    return {
-      status: "not_needed",
-      company_sponsors: null,
-      candidate_needs_visa: false,
-      h1b_applications: h1bData?.total_applications ?? null,
-    };
-  }
+  const profileSkills = userProfile?.skills_boundary
+    ? [
+        ...userProfile.skills_boundary.programming_languages,
+        ...userProfile.skills_boundary.frameworks,
+        ...userProfile.skills_boundary.tools,
+      ]
+    : [];
 
-  const jobSaysYes = jobDetails.visa_sponsorship === true;
-  const h1bActive =
-    h1bData?.total_applications != null && h1bData.total_applications > 0;
-
-  let status: VisaAssessment["status"] = "sponsor_unknown";
-  if (jobSaysYes || h1bActive) {
-    status = jobSaysYes ? "sponsor_confirmed" : "sponsor_likely";
-  }
-
-  return {
-    status,
-    company_sponsors: jobSaysYes ? true : h1bActive ? true : null,
-    candidate_needs_visa: candidateNeedsVisa,
-    h1b_applications: h1bData?.total_applications ?? null,
-  };
-}
-
-// ── Compensation ──
-
-function parseSalaryMidpoint(range: string | null | undefined): number | null {
-  if (!range) return null;
-  const nums = range.match(/[\d,]+/g);
-  if (!nums || nums.length === 0) return null;
-  const values = nums.map((n) => parseInt(n.replace(/,/g, ""), 10)).filter((n) => !isNaN(n));
-  if (values.length === 0) return null;
-  if (values.length === 1) return values[0];
-  return Math.round((values[0] + values[values.length - 1]) / 2);
-}
-
-export function assessCompensation(
-  jobDetails: JobDetails,
-  salaryData: SalaryData | undefined,
-): CompensationAssessment {
-  const jobMid = parseSalaryMidpoint(jobDetails.salary_range);
-  const marketMid = parseSalaryMidpoint(salaryData?.salary_range ?? salaryData?.median_salary);
-
-  if (jobMid == null && marketMid == null) {
-    return {
-      status: "data_unavailable",
-      job_range: jobDetails.salary_range,
-      market_range: salaryData?.salary_range ?? null,
-    };
-  }
-
-  if (jobMid != null && marketMid != null) {
-    const ratio = jobMid / marketMid;
-    const status: CompensationAssessment["status"] =
-      ratio >= 1.1 ? "above_market" : ratio >= 0.9 ? "competitive" : "below_market";
-    return {
-      status,
-      job_range: jobDetails.salary_range,
-      market_range: salaryData?.salary_range ?? null,
-    };
-  }
-
-  return {
-    status: "data_unavailable",
-    job_range: jobDetails.salary_range,
-    market_range: salaryData?.salary_range ?? null,
-  };
-}
-
-// ── ATS Keywords ──
-
-export function assessATSKeywords(
-  jobDetails: JobDetails,
-  resumeProfile: ResumeProfile,
-): ATSKeywordMatch {
-  const jdKeywords = new Set(
-    [
-      ...jobDetails.required_qualifications,
-      ...jobDetails.preferred_qualifications,
-      ...jobDetails.tech_stack,
-    ]
-      .flatMap((s) => s.toLowerCase().split(/[,;/]+/))
-      .map((s) => s.trim())
-      .filter((s) => s.length > 1),
-  );
-
-  const resumeKeywords = new Set(
-    [
-      ...resumeProfile.skills.languages,
-      ...resumeProfile.skills.frameworks,
-      ...resumeProfile.skills.tools,
-      ...resumeProfile.skills.cloud,
-      ...resumeProfile.skills.ml,
-      ...resumeProfile.experience.flatMap((e) => e.highlights),
-      ...resumeProfile.projects.flatMap((p) => p.tech),
-    ]
-      .flatMap((s) => s.toLowerCase().split(/[,;/]+/))
-      .map((s) => s.trim())
-      .filter((s) => s.length > 1),
-  );
+  // Extract tokens from resume (skills + experience highlights + project tech)
+  const resumeTokens = extractTokens([
+    ...resumeProfile.skills.languages,
+    ...resumeProfile.skills.frameworks,
+    ...resumeProfile.skills.tools,
+    ...resumeProfile.skills.cloud,
+    ...resumeProfile.skills.ml,
+    ...resumeProfile.experience.flatMap((e) => e.highlights),
+    ...resumeProfile.projects.flatMap((p) => [...p.tech, ...p.outcomes]),
+    ...profileSkills,
+  ]);
 
   const matched: string[] = [];
   const missing: string[] = [];
+  const resumeArr = [...resumeTokens];
 
-  for (const kw of jdKeywords) {
-    const found = [...resumeKeywords].some((rk) => {
+  for (const kw of jdTokens) {
+    const found = resumeArr.some((rk) => {
       if (rk === kw) return true;
-      // Only allow substring matching for tokens >= 3 chars to avoid
-      // false positives from short tokens like "go", "r", "c"
+      // Substring matching for tokens >= 3 chars (avoid "go", "r", "c" false positives)
       if (rk.length >= 3 && kw.includes(rk)) return true;
       if (kw.length >= 3 && rk.includes(kw)) return true;
       return false;
     });
-    if (found) {
-      matched.push(kw);
-    } else {
-      missing.push(kw);
-    }
+    if (found) matched.push(kw);
+    else missing.push(kw);
   }
 
   const total = matched.length + missing.length;
+  const rawScore = total > 0 ? Math.round((matched.length / total) * 100) : 60;
+  // Floor at 40 — if the job passed relevance filtering, there's baseline overlap
+  // Boost: any match at all means the candidate is in the right ballpark
+  const boost = matched.length > 0 ? Math.min(matched.length * 3, 15) : 0;
+  const score = Math.min(Math.max(rawScore + boost, 40), 100);
+
+  const dataPoints: string[] = [];
+  if (matched.length > 0) dataPoints.push(`Matched: ${matched.slice(0, 10).join(", ")}`);
+  if (missing.length > 0) dataPoints.push(`Missing: ${missing.slice(0, 8).join(", ")}`);
+
   return {
-    match_percentage: total > 0 ? Math.round((matched.length / total) * 100) : 0,
-    matched_keywords: matched,
-    missing_keywords: missing,
+    score,
+    reasoning: `${matched.length} of ${total} skill tokens matched. ${missing.length > 0 ? `Key gaps: ${missing.slice(0, 4).join(", ")}${missing.length > 4 ? "..." : ""}.` : "Strong skill overlap."}`,
+    data_points: dataPoints,
   };
 }
 
-// ── Location ──
+// ── Visa Compatibility (weight: 25%) ── deterministic from H-1B + MyVisaJobs data ──
 
-export function assessLocation(
-  jobDetails: JobDetails,
-): LocationAssessment {
-  const loc = jobDetails.location?.toLowerCase() ?? "";
-  if (loc.includes("remote")) return { status: "remote" };
-  if (!loc || loc === "n/a") return { status: "unknown" };
-  // ResumeProfile has no location field, so we can't compare
-  return { status: "unknown" };
-}
-
-// ── Education ──
-
-const EDU_HIERARCHY: Record<string, number> = {
-  "high school": 1,
-  "associate": 2,
-  "bachelor": 3,
-  "master": 4,
-  "phd": 5,
-  "doctorate": 5,
-};
-
-function parseEduLevel(text: string): number {
-  const lower = text.toLowerCase();
-  for (const [key, level] of Object.entries(EDU_HIERARCHY)) {
-    if (lower.includes(key)) return level;
-  }
-  // Also check abbreviations
-  if (/\bb\.?s\.?\b/.test(lower)) return 3;
-  if (/\bm\.?s\.?\b/.test(lower) || lower.includes("mba")) return 4;
-  return 0;
-}
-
-export function assessEducation(
+export function computeVisaScore(
+  companyIntel: CompanyIntel | null,
   jobDetails: JobDetails,
   resumeProfile: ResumeProfile,
-): EducationAssessment {
-  const requiredLevel = parseEduLevel(jobDetails.education);
-  const candidateLevel = resumeProfile.education.length > 0
-    ? Math.max(...resumeProfile.education.map((e) => parseEduLevel(e.degree)))
-    : 0;
+  userProfile?: UserProfile | null,
+): AssessmentDimension {
+  let candidateNeedsVisa: boolean | null = null;
+  if (userProfile?.work_authorization) {
+    candidateNeedsVisa = userProfile.work_authorization.require_sponsorship;
+  } else {
+    const visaStatus = resumeProfile.visa_status;
+    candidateNeedsVisa = visaStatus != null
+      ? !["us citizen", "citizen", "permanent resident", "green card"].some((s) =>
+          visaStatus.toLowerCase().includes(s),
+        )
+      : null;
+  }
 
-  const candidateDegree = resumeProfile.education[0]?.degree ?? null;
-
-  if (requiredLevel === 0 || candidateLevel === 0) {
+  if (candidateNeedsVisa === false) {
     return {
-      status: "unknown",
-      required: jobDetails.education || null,
-      candidate: candidateDegree,
+      score: 100,
+      reasoning: "Candidate does not require visa sponsorship.",
+      data_points: ["No sponsorship needed"],
     };
   }
 
-  const status: EducationAssessment["status"] =
-    candidateLevel > requiredLevel
-      ? "exceeds"
-      : candidateLevel === requiredLevel
-        ? "meets"
-        : "below";
+  const h1bData = companyIntel?.h1b?.data;
+  const mvjData = companyIntel?.myvisajobs?.data;
+  const jdSaysYes = jobDetails.visa_sponsorship === true;
 
-  return {
-    status,
-    required: jobDetails.education || null,
-    candidate: candidateDegree,
-  };
-}
+  // Merge petition counts from both sources — take the higher / more complete picture
+  const h1bCount = h1bData?.total_applications ?? 0;
+  const mvjLCA = mvjData?.lca_filings ?? 0;
+  const mvjApprovals = mvjData?.uscis_approvals ?? 0;
+  const bestPetitionCount = Math.max(h1bCount, mvjLCA, mvjApprovals);
+  const hasAnyData = h1bCount > 0 || mvjLCA > 0 || mvjApprovals > 0;
 
-// ── Orchestrators ──
-
-export function computeDeterministicScores(
-  jobDetails: JobDetails,
-  companyIntel: CompanyIntel,
-  resumeProfile: ResumeProfile,
-): DeterministicScores {
-  return {
-    visa: assessVisa(companyIntel.h1b.data, jobDetails, resumeProfile),
-    ats_keywords: assessATSKeywords(jobDetails, resumeProfile),
-    compensation: assessCompensation(
-      jobDetails,
-      companyIntel.salary.data,
-    ),
-    location: assessLocation(jobDetails),
-    education: assessEducation(jobDetails, resumeProfile),
-  };
-}
-
-const WEIGHTS = {
-  technical_fit: 0.35,
-  experience: 0.30,
-  culture: 0.15,
-  ats: 0.10,
-  education: 0.05,
-  location: 0.05,
-};
-
-function atsScore(match: ATSKeywordMatch): number {
-  return Math.round(match.match_percentage / 10);
-}
-
-function educationScore(edu: EducationAssessment): number {
-  switch (edu.status) {
-    case "exceeds": return 10;
-    case "meets": return 8;
-    case "below": return 4;
-    default: return 5;
+  const dataPoints: string[] = [];
+  if (h1bCount > 0) {
+    dataPoints.push(`h1bdata.info: ${h1bCount} petitions${h1bData?.most_recent_year ? ` (${h1bData.most_recent_year})` : ""}`);
   }
-}
-
-function locationScore(loc: LocationAssessment): number {
-  switch (loc.status) {
-    case "match": return 10;
-    case "remote": return 9;
-    case "partial": return 6;
-    default: return 5;
+  if (mvjLCA > 0 || mvjApprovals > 0) {
+    const parts: string[] = [];
+    if (mvjLCA > 0) parts.push(`${mvjLCA} LCA filings`);
+    if (mvjApprovals > 0) parts.push(`${mvjApprovals} USCIS approvals`);
+    if (mvjData?.approval_rate) parts.push(`${mvjData.approval_rate} approval rate`);
+    dataPoints.push(`MyVisaJobs: ${parts.join(", ")}`);
   }
+  if (h1bData?.approval_rate) dataPoints.push(`Approval rate (h1bdata): ${h1bData.approval_rate}`);
+  if (jdSaysYes) dataPoints.push("JD confirms visa sponsorship");
+
+  let score: number;
+  let reasoning: string;
+
+  if (jdSaysYes && bestPetitionCount > 50) {
+    score = 95;
+    reasoning = `Company confirmed sponsor with ${bestPetitionCount}+ H-1B petitions across sources.`;
+  } else if (jdSaysYes) {
+    score = 90;
+    reasoning = "JD explicitly mentions visa sponsorship.";
+  } else if (bestPetitionCount > 100) {
+    score = 90;
+    reasoning = `Company has ${bestPetitionCount}+ H-1B petitions — strong sponsorship track record.`;
+  } else if (bestPetitionCount > 50) {
+    score = 85;
+    reasoning = `Company has ${bestPetitionCount}+ H-1B petitions — likely sponsors.`;
+  } else if (bestPetitionCount > 10) {
+    score = 75;
+    reasoning = `Company has ${bestPetitionCount} H-1B petitions — moderate sponsorship history.`;
+  } else if (bestPetitionCount > 0) {
+    score = 65;
+    reasoning = `Company has limited H-1B history (${bestPetitionCount} petitions).`;
+  } else {
+    // Neither source found data — mark as uncertain, don't penalize heavily
+    score = 75;
+    reasoning = "Uncertain — no H-1B records found. Many companies sponsor without public records.";
+    dataPoints.push("No records in h1bdata.info or MyVisaJobs");
+  }
+
+  return { score, reasoning, data_points: dataPoints };
 }
 
-const EXPECTED_DIMENSIONS: Record<string, string[]> = {
-  technical: ["technical fit", "technical"],
-  experience: ["experience alignment", "experience"],
-  culture: ["culture alignment", "culture"],
-};
-
-function findDimension(
-  dims: FitDimension[],
-  candidates: string[],
-): FitDimension | undefined {
-  const name = dims.find((d) => {
-    const lower = d.name.toLowerCase();
-    return candidates.some((c) => lower === c);
-  });
-  return name;
-}
+// ── Overall Score ──
 
 export function computeOverallScore(
-  llmDimensions: FitDimension[],
-  deterministic: DeterministicScores,
+  skills: AssessmentDimension,
+  experience: AssessmentDimension,
+  visa: AssessmentDimension,
+  domain: AssessmentDimension,
 ): number {
-  const techDim = findDimension(llmDimensions, EXPECTED_DIMENSIONS.technical);
-  const expDim = findDimension(llmDimensions, EXPECTED_DIMENSIONS.experience);
-  const cultureDim = findDimension(llmDimensions, EXPECTED_DIMENSIONS.culture);
-
-  if (!techDim || !expDim || !cultureDim) {
-    console.warn(
-      "[scoring] Missing expected LLM dimensions. Got:",
-      llmDimensions.map((d) => d.name),
-    );
-  }
-
-  const techScore = techDim?.score ?? 5;
-  const expScore = expDim?.score ?? 5;
-  const cultureScore = cultureDim?.score ?? 5;
-  const atsVal = atsScore(deterministic.ats_keywords);
-  const eduVal = educationScore(deterministic.education);
-  const locVal = locationScore(deterministic.location);
-
-  const weighted =
-    techScore * WEIGHTS.technical_fit +
-    expScore * WEIGHTS.experience +
-    cultureScore * WEIGHTS.culture +
-    atsVal * WEIGHTS.ats +
-    eduVal * WEIGHTS.education +
-    locVal * WEIGHTS.location;
-
-  return Math.round(weighted * 10) / 10;
+  return Math.round(
+    skills.score * 0.30 +
+    experience.score * 0.35 +
+    visa.score * 0.25 +
+    domain.score * 0.10,
+  );
 }

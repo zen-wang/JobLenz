@@ -1,14 +1,19 @@
 import { NextRequest, NextResponse } from "next/server";
-import { runScout } from "@/lib/tinyfish";
-import { scrapeJobLinks } from "@/lib/scraper";
+import { runScoutSSE } from "@/lib/tinyfish";
 import { ensureSeeded } from "@/lib/seed";
+import { searchCompanies } from "@/lib/company-search";
 import { filterJobsByRelevance } from "@/lib/filter";
-import {
-  extractDomain,
-  domainToCompanyName,
-  normalizeCareersUrl,
-} from "@/lib/utils";
-import type { DiscoverRequest, DiscoverResult, DiscoverSSEEvent } from "@/lib/types";
+import { normalizeCareersUrl } from "@/lib/utils";
+import { cacheKey, cacheGet } from "@/lib/cache";
+import { buildScoutGoal } from "@/lib/agents";
+import type {
+  DiscoverRequest,
+  DiscoverResult,
+  DiscoverSSEEvent,
+  ScoutResult,
+} from "@/lib/types";
+
+const MAX_COMPANIES = 10;
 
 function sseEncode(event: DiscoverSSEEvent): string {
   return `data: ${JSON.stringify(event)}\n\n`;
@@ -24,18 +29,22 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
   }
 
-  const { company_url, role_query, location } = body;
+  const { search_preferences } = body;
 
-  if (!company_url || !role_query) {
+  if (
+    !search_preferences?.positions?.length ||
+    !search_preferences.positions.some((p) => p.trim())
+  ) {
     return NextResponse.json(
-      { error: "company_url and role_query are required" },
+      { error: "At least one position preference is required" },
       { status: 400 },
     );
   }
 
-  const domain = extractDomain(company_url);
-  const companyName = domainToCompanyName(domain);
-  const careersUrl = normalizeCareersUrl(company_url);
+  const positions = search_preferences.positions.filter((p) => p.trim());
+  const location = search_preferences.location || "";
+  const skipCache = search_preferences.skip_cache ?? false;
+  const targetCompanies = search_preferences.target_companies?.filter((c) => c.trim()) ?? [];
 
   const stream = new ReadableStream({
     async start(controller) {
@@ -47,113 +56,192 @@ export async function POST(req: NextRequest) {
       try {
         const start = Date.now();
 
-        // ── Seed cache ──
+        // ── Step 1: Web search to find companies ──
         emit({
           type: "progress",
-          message: "Loading seed cache...",
-          sub_stage: "seed",
+          message: `Searching for companies hiring ${positions.join(", ")}${location ? ` in ${location}` : ""}...`,
+          sub_stage: "search",
         });
 
-        // ── Scout ──
-        emit({
-          type: "progress",
-          message: `Scouting ${companyName} careers page...`,
-          sub_stage: "scout",
-          detail: "This may take 15-90s for uncached companies",
-        });
+        const { companies: searchedCompanies, latency_ms: searchLatency } = await searchCompanies(
+          positions,
+          location,
+          MAX_COMPANIES,
+        );
 
-        const scout = await runScout(careersUrl, role_query, location);
+        // Merge user-specified target companies (prioritized first)
+        const seenDomains = new Set<string>();
+        const companies: typeof searchedCompanies = [];
 
-        const scoutMsg = scout.cached
-          ? `Scout cache hit — ${scout.result.jobs.length} jobs found`
-          : `Scout complete — ${scout.result.jobs.length} jobs found in ${(scout.latency_ms / 1000).toFixed(1)}s`;
-        emit({
-          type: "progress",
-          message: scoutMsg,
-          sub_stage: "scout",
-        });
-
-        // Merge scout jobs into a deduped map keyed by URL
-        const jobMap = new Map<string, { title: string; url: string; location?: string }>();
-        for (const j of scout.result.jobs) {
-          jobMap.set(j.url, { title: j.title, url: j.url, location: j.location });
-        }
-
-        // ── Scraper ──
-        let scraperLatency = 0;
-        let method: "scout+scraper" | "scout_only" = "scout_only";
-
-        if (scout.result.url_changed && scout.result.filtered_url) {
-          method = "scout+scraper";
-          emit({
-            type: "progress",
-            message: "Running scraper for additional listings...",
-            sub_stage: "scraper",
-          });
-
-          try {
-            const scraped = await scrapeJobLinks(scout.result.filtered_url);
-            scraperLatency = scraped.latency_ms;
-            let added = 0;
-            for (const j of scraped.jobs) {
-              if (!jobMap.has(j.url)) {
-                jobMap.set(j.url, { title: j.title, url: j.url, location: j.location });
-                added++;
-              }
-            }
-            emit({
-              type: "progress",
-              message: `Scraper found ${added} additional listings`,
-              sub_stage: "scraper",
-            });
-          } catch (err) {
-            console.warn("[discover] Scraper failed, using scout results only:", err);
-            emit({
-              type: "progress",
-              message: "Scraper failed — using scout results only",
-              sub_stage: "scraper",
+        for (const name of targetCompanies) {
+          const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, "");
+          const domain = `${slug}.com`;
+          if (!seenDomains.has(domain)) {
+            seenDomains.add(domain);
+            companies.push({
+              name,
+              domain,
+              careers_url: `https://www.${domain}/careers`,
+              source_url: `user-specified`,
             });
           }
         }
 
-        // ── Dedup ──
+        for (const c of searchedCompanies) {
+          if (!seenDomains.has(c.domain)) {
+            seenDomains.add(c.domain);
+            companies.push(c);
+          }
+        }
+
+        if (companies.length === 0) {
+          emit({ type: "error", message: "No companies found for your search. Try broader role terms." });
+          controller.close();
+          return;
+        }
+
+        emit({
+          type: "progress",
+          message: `Found ${companies.length} companies: ${companies.map((c) => c.name).join(", ")}`,
+          sub_stage: "search",
+        });
+
+        // ── Step 2: TinyFish scouts each company's careers page ──
+        await ensureSeeded();
+
+        const jobMap = new Map<
+          string,
+          { title: string; url: string; location?: string; company?: string }
+        >();
+        let totalScoutLatency = 0;
+        let totalSteps = 0;
+        const companiesScouted: { name: string; domain: string; careers_url: string }[] = [];
+
+        // ── Partition companies into cached vs non-cached ──
+        const goal = buildScoutGoal(positions[0], location || undefined);
+        const cachedCompanies: { company: typeof companies[0]; careersUrl: string; data: ScoutResult }[] = [];
+        const nonCachedCompanies: { company: typeof companies[0]; careersUrl: string }[] = [];
+
+        for (const company of companies) {
+          const careersUrl = normalizeCareersUrl(company.careers_url);
+          const key = cacheKey(careersUrl, goal);
+          const cached = skipCache ? null : await cacheGet<ScoutResult>(key);
+          if (cached) {
+            cachedCompanies.push({ company, careersUrl, data: cached });
+          } else {
+            nonCachedCompanies.push({ company, careersUrl });
+          }
+        }
+
+        // ── Process cached companies first (instant) ──
+        for (const { company, careersUrl, data } of cachedCompanies) {
+          let added = 0;
+          for (const j of data.jobs) {
+            if (!jobMap.has(j.url)) {
+              jobMap.set(j.url, { title: j.title, url: j.url, location: j.location, company: company.name });
+              added++;
+            }
+          }
+          companiesScouted.push({ name: company.name, domain: company.domain, careers_url: careersUrl });
+          emit({ type: "progress", message: `${company.name}: cache hit — ${data.jobs.length} jobs`, sub_stage: "scout" });
+        }
+
+        // ── Run non-cached companies via SSE with a 3-slot pool ──
+        // As each agent finishes, its slot is freed and the next queued company takes over.
+        const MAX_SLOTS = 3;
+        const queue = [...nonCachedCompanies];
+
+        if (queue.length > 0) {
+          // Helper: run one company in a given slot, collect results, then emit slot_done
+          const runInSlot = async (
+            entry: typeof queue[0],
+            slot: number,
+          ) => {
+            emit({ type: "progress", message: `Scouting ${entry.company.name} careers page...`, sub_stage: "scout", detail: entry.careersUrl });
+            try {
+              const scout = await runScoutSSE(
+                entry.careersUrl,
+                positions[0],
+                location || undefined,
+                (url) => emit({ type: "streaming_url", url, company: entry.company.name, slot }),
+                (msg) => emit({ type: "agent_progress", message: msg }),
+                skipCache,
+              );
+              totalScoutLatency += scout.latency_ms;
+              totalSteps += scout.steps_used;
+              let added = 0;
+              for (const j of scout.result.jobs) {
+                if (!jobMap.has(j.url)) {
+                  jobMap.set(j.url, { title: j.title, url: j.url, location: j.location, company: entry.company.name });
+                  added++;
+                }
+              }
+              companiesScouted.push({ name: entry.company.name, domain: entry.company.domain, careers_url: entry.careersUrl });
+              const msg = scout.cached
+                ? `${entry.company.name}: cache hit — ${scout.result.jobs.length} jobs`
+                : `${entry.company.name}: found ${added} jobs in ${(scout.latency_ms / 1000).toFixed(1)}s`;
+              emit({ type: "progress", message: msg, sub_stage: "scout" });
+            } catch (err) {
+              const errMsg = err instanceof Error ? err.message : "Unknown error";
+              console.warn(`[discover] Scout failed for ${entry.company.name}:`, errMsg);
+              emit({ type: "progress", message: `${entry.company.name}: scout failed — ${errMsg}`, sub_stage: "scout" });
+            }
+            emit({ type: "slot_done", slot });
+          };
+
+          // Slot pool: start up to MAX_SLOTS, each slot self-replenishes from the queue
+          let queueIdx = 0;
+          const slotWorker = async (slot: number) => {
+            while (queueIdx < queue.length) {
+              const idx = queueIdx++;
+              await runInSlot(queue[idx], slot);
+            }
+          };
+
+          const workers = Array.from(
+            { length: Math.min(MAX_SLOTS, queue.length) },
+            (_, i) => slotWorker(i),
+          );
+          await Promise.all(workers);
+        }
+
+        // ── Step 3: Dedup + Filter ──
         const allJobs = Array.from(jobMap.values());
         emit({
           type: "progress",
-          message: `Deduplication complete — ${allJobs.length} unique jobs`,
+          message: `${allJobs.length} unique jobs from ${companiesScouted.length} companies`,
           sub_stage: "dedup",
         });
 
-        // ── Filter ──
-        const { jobs: filteredJobs, stats: filterStats } = filterJobsByRelevance(allJobs, role_query);
+        const combinedQuery = positions.join(" ");
+        const { jobs: filteredJobs, stats: filterStats } =
+          filterJobsByRelevance(allJobs, combinedQuery);
+
         emit({
           type: "progress",
-          message: `Filtered: ${filteredJobs.length} of ${allJobs.length} jobs match '${role_query}'`,
+          message: `Filtered: ${filteredJobs.length} of ${allJobs.length} jobs match your preferences`,
           sub_stage: "filter",
         });
 
         // ── Result ──
         const result: DiscoverResult = {
-          company: {
-            name: companyName,
-            domain,
-            careers_url: scout.result.filtered_url || careersUrl,
+          search_context: {
+            positions,
+            location: location || "Any location",
+            source: "company_scout",
           },
           jobs: filteredJobs,
           scout_metadata: {
-            filtered_url: scout.result.filtered_url,
-            url_changed: scout.result.url_changed,
-            method,
-            scout_latency_ms: scout.latency_ms,
-            scout_steps: scout.steps_used,
-            scraper_latency_ms: scraperLatency,
+            method: "job_search",
+            scout_latency_ms: totalScoutLatency + searchLatency,
+            scout_steps: totalSteps,
             total_jobs_found: allJobs.length,
             filter_stats: filterStats,
           },
         };
 
         console.log(
-          `[discover] Done in ${Date.now() - start}ms — ${filteredJobs.length}/${allJobs.length} jobs after filter, cache=${scout.cached}`,
+          `[discover] Done in ${Date.now() - start}ms — ${companiesScouted.length} companies, ${filteredJobs.length}/${allJobs.length} jobs after filter`,
         );
 
         emit({ type: "result", data: result });

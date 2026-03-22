@@ -8,12 +8,14 @@ import type {
   JobDetails,
   ResumeProfile,
 } from "@/lib/types";
+import type { UserProfile } from "@/lib/profile-types";
 
 interface CoverLetterRequest {
   resume_profile: ResumeProfile;
   job_details: JobDetails;
-  company_intel: CompanyIntel;
+  company_intel?: CompanyIntel | null;
   fit_report: FitReport;
+  user_profile?: UserProfile | null;
 }
 
 export async function POST(req: NextRequest) {
@@ -26,7 +28,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
   }
 
-  const { resume_profile, job_details, company_intel, fit_report } = body;
+  const { resume_profile, job_details, company_intel, fit_report, user_profile } = body;
 
   if (!resume_profile || !job_details || !fit_report) {
     return NextResponse.json(
@@ -36,6 +38,15 @@ export async function POST(req: NextRequest) {
   }
 
   try {
+    // Add visa/sponsorship context from user profile if available
+    let profileContext = "";
+    if (user_profile) {
+      const wa = user_profile.work_authorization;
+      if (wa.require_sponsorship) {
+        profileContext = `\n## Candidate Work Authorization\nRequires sponsorship: Yes\nPermit type: ${wa.work_permit_type || "not specified"}\nNote: If H-1B data shows the company sponsors, briefly mention willingness to discuss visa process.\n`;
+      }
+    }
+
     const userPrompt = `## Candidate Resume Profile
 ${JSON.stringify(resume_profile, null, 2)}
 
@@ -51,10 +62,12 @@ ${company_intel?.values?.data ? JSON.stringify(company_intel.values.data, null, 
 ${company_intel?.h1b?.data ? JSON.stringify(company_intel.h1b.data, null, 2) : "DATA UNAVAILABLE"}
 
 ## Fit Report Summary
-Overall Score: ${fit_report.overall_score}/10
-Strengths: ${fit_report.strengths.map((s) => s.text).join("; ")}
-Key Dimensions: ${fit_report.dimensions.map((d) => `${d.name}: ${d.score}/10`).join(", ")}
-
+Overall Score: ${fit_report.overall_score}%
+Skills Match: ${fit_report.skills_match.score}% — ${fit_report.skills_match.reasoning}
+Experience Fit: ${fit_report.experience_fit.score}% — ${fit_report.experience_fit.reasoning}
+Visa Compatibility: ${fit_report.visa_compatibility.score}% — ${fit_report.visa_compatibility.reasoning}
+Domain Relevance: ${fit_report.domain_relevance.score}% — ${fit_report.domain_relevance.reasoning}
+${profileContext}
 Generate the cover letter and key points JSON now.`;
 
     const { data, provider, model, latency_ms } =

@@ -1,4 +1,5 @@
 import type { FilterStats } from "./types";
+import type { UserProfile } from "./profile-types";
 
 const STOP_WORDS = new Set([
   "a", "an", "the", "and", "or", "for", "in", "on", "at", "to", "of",
@@ -18,13 +19,34 @@ const RELATED_TITLES = [
 ];
 
 export function filterJobsByRelevance(
-  jobs: { title: string; url: string; location?: string }[],
+  jobs: { title: string; url: string; location?: string; company?: string }[],
   roleQuery: string,
+  userProfile?: UserProfile | null,
 ): { jobs: typeof jobs; stats: FilterStats } {
-  const queryWords = roleQuery
+  // Build query words from roleQuery + profile's target_role if different
+  const queryParts = [roleQuery];
+  if (
+    userProfile?.experience.target_role &&
+    userProfile.experience.target_role.toLowerCase() !== roleQuery.toLowerCase()
+  ) {
+    queryParts.push(userProfile.experience.target_role);
+  }
+
+  const queryWords = queryParts
+    .join(" ")
     .toLowerCase()
     .split(/\s+/)
     .filter((w) => w.length > 1 && !STOP_WORDS.has(w));
+
+  // Build extra keyword set from profile skills for title matching
+  const profileKeywords = userProfile?.skills_boundary
+    ? [
+        ...userProfile.skills_boundary.programming_languages,
+        ...userProfile.skills_boundary.frameworks,
+      ]
+        .map((s) => s.toLowerCase())
+        .filter((s) => s.length > 2)
+    : [];
 
   const minMatch = queryWords.length < 2 ? 1 : 2;
 
@@ -36,7 +58,12 @@ export function filterJobsByRelevance(
     if (matchCount >= minMatch) return true;
 
     // Check related titles
-    return RELATED_TITLES.some((rt) => titleLower.includes(rt));
+    if (RELATED_TITLES.some((rt) => titleLower.includes(rt))) return true;
+
+    // Check profile skill keywords in title (e.g. "PyTorch" in "PyTorch Engineer")
+    if (profileKeywords.some((pk) => titleLower.includes(pk))) return true;
+
+    return false;
   });
 
   return {

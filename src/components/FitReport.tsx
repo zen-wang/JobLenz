@@ -1,24 +1,18 @@
 "use client";
 
-import type {
-  FitDimension,
-  Evidence,
-  DeterministicScores,
-  MissingRequirements,
-} from "@/lib/types";
-import DimensionCard from "./DimensionCard";
+import { useState } from "react";
+import type { AssessmentDimension } from "@/lib/types";
 
 interface FitReportProps {
   job: {
     url: string;
     title: string;
     overall_score: number;
-    dimensions: FitDimension[];
-    strengths: Evidence[];
-    concerns: Evidence[];
+    skills_match: AssessmentDimension;
+    experience_fit: AssessmentDimension;
+    visa_compatibility: AssessmentDimension;
+    domain_relevance: AssessmentDimension;
     next_steps: string;
-    deterministic?: DeterministicScores;
-    missing_requirements?: MissingRequirements;
   };
   onTailor?: () => void;
   onCoverLetter?: () => void;
@@ -26,82 +20,79 @@ interface FitReportProps {
   coverLetterLoading?: boolean;
 }
 
-function overallScoreColor(score: number): string {
-  if (score >= 7) return "text-green-600";
-  if (score >= 4) return "text-yellow-600";
-  return "text-red-600";
+function scoreColor(score: number): string {
+  if (score >= 80) return "var(--accent-green)";
+  if (score >= 60) return "var(--accent-orange)";
+  return "var(--accent-red)";
 }
 
-function StatusBadge({
+function DimensionBar({
   label,
-  status,
-  variant,
+  weight,
+  dimension,
 }: {
   label: string;
-  status: string;
-  variant: "green" | "yellow" | "gray" | "red" | "blue";
+  weight: string;
+  dimension: AssessmentDimension;
 }) {
-  const colors = {
-    green: "bg-green-100 text-green-800",
-    yellow: "bg-yellow-100 text-yellow-800",
-    gray: "bg-gray-100 text-gray-700",
-    red: "bg-red-100 text-red-800",
-    blue: "bg-blue-100 text-blue-800",
-  };
+  const [expanded, setExpanded] = useState(false);
+  const color = scoreColor(dimension.score);
+
   return (
-    <div className="flex items-center gap-2">
-      <span className="text-xs text-gray-500 w-20 shrink-0">{label}</span>
-      <span
-        className={`px-2 py-0.5 rounded-full text-xs font-medium ${colors[variant]}`}
+    <div className="space-y-1.5">
+      <div
+        className="flex items-center gap-2 cursor-pointer"
+        onClick={() => setExpanded(!expanded)}
       >
-        {status}
-      </span>
+        <div className="flex items-center gap-1.5 w-28 shrink-0">
+          <span className="text-[12px] font-medium" style={{ color: "var(--text-primary)" }}>
+            {label}
+          </span>
+          <span className="text-[9px]" style={{ color: "var(--text-muted)" }}>
+            {weight}
+          </span>
+        </div>
+        <div className="flex-1 h-2.5 rounded-full" style={{ background: "rgba(255,255,255,0.05)" }}>
+          <div
+            className="h-full rounded-full transition-all duration-500"
+            style={{ width: `${dimension.score}%`, background: color, opacity: 0.8 }}
+          />
+        </div>
+        <span className="text-[13px] font-mono font-semibold w-10 text-right" style={{ color }}>
+          {dimension.score}
+        </span>
+        <svg
+          className={`w-3.5 h-3.5 shrink-0 transition-transform ${expanded ? "rotate-180" : ""}`}
+          style={{ color: "var(--text-muted)" }}
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+        </svg>
+      </div>
+
+      {expanded && (
+        <div className="ml-[120px] space-y-1.5">
+          <p className="text-[12px] leading-relaxed" style={{ color: "var(--text-secondary)" }}>
+            {dimension.reasoning}
+          </p>
+          {dimension.data_points.length > 0 && (
+            <div className="flex flex-wrap gap-1">
+              {dimension.data_points.map((dp, i) => (
+                <span
+                  key={i}
+                  className="px-1.5 py-0.5 text-[10px] glass-badge glass-badge-gray rounded font-mono"
+                >
+                  {dp}
+                </span>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
-}
-
-function visaBadgeVariant(
-  status: string,
-): "green" | "yellow" | "gray" {
-  if (status === "sponsor_confirmed" || status === "not_needed") return "green";
-  if (status === "sponsor_likely") return "yellow";
-  return "gray";
-}
-
-function visaLabel(status: string): string {
-  switch (status) {
-    case "sponsor_confirmed": return "Sponsor Confirmed";
-    case "sponsor_likely": return "Sponsor Likely";
-    case "not_needed": return "Not Needed";
-    default: return "Unknown";
-  }
-}
-
-function compBadgeVariant(
-  status: string,
-): "green" | "yellow" | "gray" | "red" {
-  if (status === "above_market") return "green";
-  if (status === "competitive") return "green";
-  if (status === "below_market") return "yellow";
-  return "gray";
-}
-
-function locationBadgeVariant(
-  status: string,
-): "green" | "blue" | "yellow" | "gray" {
-  if (status === "match") return "green";
-  if (status === "remote") return "blue";
-  if (status === "partial") return "yellow";
-  return "gray";
-}
-
-function eduBadgeVariant(
-  status: string,
-): "green" | "yellow" | "red" | "gray" {
-  if (status === "exceeds") return "green";
-  if (status === "meets") return "green";
-  if (status === "below") return "red";
-  return "gray";
 }
 
 export default function FitReport({
@@ -111,211 +102,67 @@ export default function FitReport({
   tailorLoading,
   coverLetterLoading,
 }: FitReportProps) {
+  const overallColor = scoreColor(job.overall_score);
+
   return (
     <div className="space-y-4">
-      {/* Header with overall score */}
+      {/* Header */}
       <div className="flex items-center gap-4">
         <div className="text-center">
-          <div
-            className={`text-4xl font-bold ${overallScoreColor(job.overall_score)}`}
-          >
-            {job.overall_score}
+          <div className="text-3xl font-bold" style={{ color: overallColor }}>
+            {job.overall_score}%
           </div>
-          <div className="text-[10px] text-gray-500 uppercase tracking-wide">
-            / 10
+          <div className="text-[9px] font-label uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>
+            overall fit
           </div>
         </div>
         <div>
-          <h3 className="text-base font-semibold text-gray-900">{job.title}</h3>
+          <h3 className="text-base font-semibold" style={{ color: "var(--text-primary)" }}>{job.title}</h3>
           <a
             href={job.url}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-xs text-blue-600 hover:underline"
+            className="text-xs hover:underline"
+            style={{ color: "var(--accent-blue)" }}
           >
             View posting
           </a>
         </div>
       </div>
 
-      {/* LLM Dimension cards grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
-        {job.dimensions.map((dim) => (
-          <DimensionCard key={dim.name} dimension={dim} />
-        ))}
+      {/* 4 Dimension bars */}
+      <div className="space-y-3">
+        <DimensionBar label="Skills Match" weight="30%" dimension={job.skills_match} />
+        <DimensionBar label="Experience Fit" weight="35%" dimension={job.experience_fit} />
+        <DimensionBar label="Visa" weight="25%" dimension={job.visa_compatibility} />
+        <DimensionBar label="Domain" weight="10%" dimension={job.domain_relevance} />
       </div>
 
-      {/* Deterministic Assessments */}
-      {job.deterministic && (
-        <div className="border border-gray-200 rounded-lg p-3 space-y-3">
-          <h4 className="text-xs font-semibold text-gray-700 uppercase tracking-wide">
-            Data-Driven Assessments
-          </h4>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-            <StatusBadge
-              label="Visa"
-              status={visaLabel(job.deterministic.visa.status)}
-              variant={visaBadgeVariant(job.deterministic.visa.status)}
-            />
-            <StatusBadge
-              label="Comp"
-              status={job.deterministic.compensation.status.replace("_", " ")}
-              variant={compBadgeVariant(job.deterministic.compensation.status)}
-            />
-            <StatusBadge
-              label="Location"
-              status={job.deterministic.location.status}
-              variant={locationBadgeVariant(job.deterministic.location.status)}
-            />
-            <StatusBadge
-              label="Education"
-              status={job.deterministic.education.status}
-              variant={eduBadgeVariant(job.deterministic.education.status)}
-            />
-          </div>
-
-          {/* ATS Keywords */}
-          <div className="space-y-1.5">
-            <div className="flex items-center gap-2">
-              <span className="text-xs text-gray-500 w-20 shrink-0">ATS Match</span>
-              <div className="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
-                <div
-                  className="h-full bg-blue-500 rounded-full transition-all"
-                  style={{
-                    width: `${job.deterministic.ats_keywords.match_percentage}%`,
-                  }}
-                />
-              </div>
-              <span className="text-xs font-mono text-gray-700">
-                {job.deterministic.ats_keywords.match_percentage}%
-              </span>
-            </div>
-
-            {job.deterministic.ats_keywords.matched_keywords.length > 0 && (
-              <div className="flex flex-wrap gap-1 ml-[88px]">
-                {job.deterministic.ats_keywords.matched_keywords.slice(0, 8).map((kw) => (
-                  <span
-                    key={kw}
-                    className="px-1.5 py-0.5 bg-green-100 text-green-700 rounded text-[10px]"
-                  >
-                    {kw}
-                  </span>
-                ))}
-              </div>
-            )}
-
-            {job.deterministic.ats_keywords.missing_keywords.length > 0 && (
-              <div className="flex flex-wrap gap-1 ml-[88px]">
-                {job.deterministic.ats_keywords.missing_keywords.slice(0, 8).map((kw) => (
-                  <span
-                    key={kw}
-                    className="px-1.5 py-0.5 bg-red-50 text-red-600 rounded text-[10px]"
-                  >
-                    {kw}
-                  </span>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-      )}
-
-      {/* Missing Requirements */}
-      {job.missing_requirements &&
-        (job.missing_requirements.required.length > 0 ||
-          job.missing_requirements.preferred.length > 0) && (
-          <div className="border border-gray-200 rounded-lg p-3 space-y-2">
-            <h4 className="text-xs font-semibold text-gray-700 uppercase tracking-wide">
-              Missing Requirements
-            </h4>
-
-            {job.missing_requirements.required.length > 0 && (
-              <div>
-                <span className="text-[10px] font-semibold text-red-600 uppercase">
-                  Required (must-have)
-                </span>
-                <ul className="mt-1 space-y-0.5">
-                  {job.missing_requirements.required.map((r, i) => (
-                    <li
-                      key={i}
-                      className="text-xs text-red-700 flex items-start gap-1"
-                    >
-                      <span className="text-red-400 mt-px">-</span>
-                      {r}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-
-            {job.missing_requirements.preferred.length > 0 && (
-              <div>
-                <span className="text-[10px] font-semibold text-yellow-600 uppercase">
-                  Preferred (nice-to-have)
-                </span>
-                <ul className="mt-1 space-y-0.5">
-                  {job.missing_requirements.preferred.map((p, i) => (
-                    <li
-                      key={i}
-                      className="text-xs text-yellow-700 flex items-start gap-1"
-                    >
-                      <span className="text-yellow-400 mt-px">-</span>
-                      {p}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-          </div>
-        )}
-
-      {/* Strengths & Concerns */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div>
-          <h4 className="text-xs font-semibold text-green-700 uppercase tracking-wide mb-2">
-            Strengths
-          </h4>
-          <ul className="space-y-2">
-            {job.strengths.map((s, i) => (
-              <li key={i} className="text-sm text-gray-700">
-                <span className="font-medium">{s.text}</span>
-                <p className="text-xs text-gray-500 mt-0.5">
-                  {s.evidence}{" "}
-                  <span className="font-mono text-[10px] text-gray-400">
-                    [{s.source}]
-                  </span>
-                </p>
-              </li>
-            ))}
-          </ul>
-        </div>
-        <div>
-          <h4 className="text-xs font-semibold text-red-700 uppercase tracking-wide mb-2">
-            Concerns
-          </h4>
-          <ul className="space-y-2">
-            {job.concerns.map((c, i) => (
-              <li key={i} className="text-sm text-gray-700">
-                <span className="font-medium">{c.text}</span>
-                <p className="text-xs text-gray-500 mt-0.5">
-                  {c.evidence}{" "}
-                  <span className="font-mono text-[10px] text-gray-400">
-                    [{c.source}]
-                  </span>
-                </p>
-              </li>
-            ))}
-          </ul>
+      {/* Formula display */}
+      <div className="glass-inner p-2.5 rounded-lg">
+        <div className="text-[10px] font-mono text-center" style={{ color: "var(--text-muted)" }}>
+          {job.skills_match.score}
+          <span style={{ color: "var(--text-muted)", opacity: 0.5 }}> x0.3</span>
+          {" + "}
+          {job.experience_fit.score}
+          <span style={{ color: "var(--text-muted)", opacity: 0.5 }}> x0.35</span>
+          {" + "}
+          {job.visa_compatibility.score}
+          <span style={{ color: "var(--text-muted)", opacity: 0.5 }}> x0.25</span>
+          {" + "}
+          {job.domain_relevance.score}
+          <span style={{ color: "var(--text-muted)", opacity: 0.5 }}> x0.1</span>
+          {" = "}
+          <span style={{ color: overallColor, fontWeight: 600 }}>{job.overall_score}%</span>
         </div>
       </div>
 
       {/* Next steps */}
-      <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
-        <h4 className="text-xs font-semibold text-blue-700 uppercase tracking-wide mb-1">
+      <div className="glass-inner p-3" style={{ borderColor: "rgba(255,255,255,0.15)" }}>
+        <h4 className="text-xs font-semibold font-label uppercase tracking-wider mb-1" style={{ color: "var(--accent-blue)" }}>
           Recommended Next Steps
         </h4>
-        <p className="text-sm text-blue-900">{job.next_steps}</p>
+        <p className="text-sm" style={{ color: "var(--text-secondary)" }}>{job.next_steps}</p>
       </div>
 
       {/* Action buttons */}
@@ -325,11 +172,11 @@ export default function FitReport({
             <button
               onClick={onTailor}
               disabled={tailorLoading}
-              className="flex-1 px-4 py-2 text-sm font-medium rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="flex-1 px-4 py-2 text-sm glass-btn glass-btn-primary"
             >
               {tailorLoading ? (
                 <span className="flex items-center justify-center gap-2">
-                  <span className="animate-spin w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full" />
+                  <span className="animate-spin w-3.5 h-3.5 border-2 border-blue-300 border-t-transparent rounded-full" />
                   Tailoring...
                 </span>
               ) : (
@@ -341,11 +188,11 @@ export default function FitReport({
             <button
               onClick={onCoverLetter}
               disabled={coverLetterLoading}
-              className="flex-1 px-4 py-2 text-sm font-medium rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="flex-1 px-4 py-2 text-sm glass-btn glass-btn-green"
             >
               {coverLetterLoading ? (
                 <span className="flex items-center justify-center gap-2">
-                  <span className="animate-spin w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full" />
+                  <span className="animate-spin w-3.5 h-3.5 border-2 border-emerald-300 border-t-transparent rounded-full" />
                   Generating...
                 </span>
               ) : (

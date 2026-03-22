@@ -2,6 +2,7 @@ import type {
   ScoutResult,
   JobDetails,
   H1BData,
+  MyVisaJobsData,
   ValuesData,
   SalaryData,
   CompanyIntel,
@@ -9,14 +10,17 @@ import type {
 } from "./types";
 import {
   buildScoutGoal,
+  buildJobSearchGoal,
   buildJDExtractionGoal,
   buildH1BGoal,
+  buildMyVisaJobsGoal,
   buildValuesGoal,
   buildSalaryGoal,
 } from "./agents";
 import { cacheKey, cacheGet, cacheSet } from "./cache";
 
 const TINYFISH_URL = "https://agent.tinyfish.ai/v1/automation/run";
+const TINYFISH_SSE_URL = "https://agent.tinyfish.ai/v1/automation/run-sse";
 
 interface TinyFishResponse {
   run_id?: string;
@@ -75,6 +79,7 @@ async function cachedTinyFishCall<T>(
   url: string,
   goal: string,
   agentId: string,
+  skipCache: boolean = false,
 ): Promise<{
   data: T | null;
   metrics: AgentMetrics;
@@ -82,8 +87,8 @@ async function cachedTinyFishCall<T>(
   const key = cacheKey(url, goal);
   const start = Date.now();
 
-  // Check cache first
-  const cached = await cacheGet<T>(key);
+  // Check cache first (unless skip_cache is set)
+  const cached = skipCache ? null : await cacheGet<T>(key);
   if (cached) {
     return {
       data: cached,
@@ -152,6 +157,7 @@ export async function runScout(
   companyUrl: string,
   roleQuery: string,
   location?: string,
+  skipCache: boolean = false,
 ): Promise<{
   result: ScoutResult;
   cached: boolean;
@@ -161,13 +167,177 @@ export async function runScout(
   const goal = buildScoutGoal(roleQuery, location);
   const key = cacheKey(companyUrl, goal);
 
-  const cached = await cacheGet<ScoutResult>(key);
+  const cached = skipCache ? null : await cacheGet<ScoutResult>(key);
   if (cached) {
     return { result: cached, cached: true, latency_ms: 0, steps_used: 0 };
   }
 
   const start = Date.now();
   const apiResult = await callTinyFish(companyUrl, goal);
+
+  if (!apiResult) {
+    throw new Error(
+      "No cached data and TINYFISH_API_KEY is not set. " +
+        "Seed the cache or provide an API key.",
+    );
+  }
+
+  const scoutResult = apiResult.data as ScoutResult;
+  const latency_ms = Date.now() - start;
+
+  await cacheSet(key, scoutResult);
+
+  return {
+    result: scoutResult,
+    cached: false,
+    latency_ms,
+    steps_used: apiResult.steps_used,
+  };
+}
+
+/**
+ * Run the scout agent via SSE to get a live browser streaming URL.
+ * For the first company scouted, this provides a live iframe view.
+ * Falls back to sync runScout() if API key is missing or SSE fails.
+ */
+export async function runScoutSSE(
+  companyUrl: string,
+  roleQuery: string,
+  location?: string,
+  onStreamingUrl?: (url: string) => void,
+  onProgress?: (message: string) => void,
+  skipCache: boolean = false,
+): Promise<{
+  result: ScoutResult;
+  cached: boolean;
+  latency_ms: number;
+  steps_used: number;
+}> {
+  const goal = buildScoutGoal(roleQuery, location);
+  const key = cacheKey(companyUrl, goal);
+
+  // Check cache first — skip SSE entirely for cache hits
+  const cached = skipCache ? null : await cacheGet<ScoutResult>(key);
+  if (cached) {
+    return { result: cached, cached: true, latency_ms: 0, steps_used: 0 };
+  }
+
+  const apiKey = process.env.TINYFISH_API_KEY;
+  if (!apiKey) {
+    // Fall back to sync (which will also fail, but with a consistent error)
+    return runScout(companyUrl, roleQuery, location, skipCache);
+  }
+
+  const start = Date.now();
+
+  try {
+    const res = await fetch(TINYFISH_SSE_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-API-Key": apiKey,
+        Accept: "text/event-stream",
+      },
+      body: JSON.stringify({ url: companyUrl, goal }),
+    });
+
+    if (!res.ok) {
+      console.warn(`[tinyfish-sse] HTTP ${res.status}, falling back to sync`);
+      return runScout(companyUrl, roleQuery, location, skipCache);
+    }
+
+    const reader = res.body?.getReader();
+    if (!reader) {
+      return runScout(companyUrl, roleQuery, location, skipCache);
+    }
+
+    const decoder = new TextDecoder();
+    let buffer = "";
+    let scoutResult: ScoutResult | null = null;
+    let stepsUsed = 0;
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+
+      buffer += decoder.decode(value, { stream: true });
+      const parts = buffer.split("\n\n");
+      buffer = parts.pop() ?? "";
+
+      for (const part of parts) {
+        const line = part.trim();
+        if (!line.startsWith("data: ")) continue;
+
+        try {
+          const event = JSON.parse(line.slice(6)) as {
+            type?: string;
+            streaming_url?: string;
+            purpose?: string;
+            message?: string;
+            result?: unknown;
+            steps_used?: number;
+            error?: string;
+          };
+
+          if (event.type === "STREAMING_URL" && event.streaming_url) {
+            onStreamingUrl?.(event.streaming_url);
+          } else if (event.type === "PROGRESS") {
+            onProgress?.(event.purpose ?? event.message ?? "Working...");
+          } else if (event.type === "COMPLETE") {
+            stepsUsed = event.steps_used ?? 0;
+            const raw = event.result;
+            scoutResult =
+              typeof raw === "string"
+                ? (JSON.parse(raw) as ScoutResult)
+                : (raw as ScoutResult);
+          } else if (event.type === "ERROR") {
+            throw new Error(event.error ?? "TinyFish SSE agent error");
+          }
+        } catch (parseErr) {
+          // Skip malformed SSE events
+          if (parseErr instanceof SyntaxError) continue;
+          throw parseErr;
+        }
+      }
+    }
+
+    if (!scoutResult) {
+      console.warn("[tinyfish-sse] Stream ended without COMPLETE, falling back");
+      return runScout(companyUrl, roleQuery, location, skipCache);
+    }
+
+    const latency_ms = Date.now() - start;
+    await cacheSet(key, scoutResult);
+
+    return { result: scoutResult, cached: false, latency_ms, steps_used: stepsUsed };
+  } catch (err) {
+    console.warn("[tinyfish-sse] SSE failed, falling back to sync:", err);
+    return runScout(companyUrl, roleQuery, location, skipCache);
+  }
+}
+
+/**
+ * Run a job board search via TinyFish.
+ * Navigates to the given search URL (e.g. Indeed) and extracts job listings.
+ */
+export async function runJobBoardSearch(
+  searchUrl: string,
+): Promise<{
+  result: ScoutResult;
+  cached: boolean;
+  latency_ms: number;
+  steps_used: number;
+}> {
+  const goal = buildJobSearchGoal();
+  const key = cacheKey(searchUrl, goal);
+
+  const cached = await cacheGet<ScoutResult>(key);
+  if (cached) {
+    return { result: cached, cached: true, latency_ms: 0, steps_used: 0 };
+  }
+
+  const start = Date.now();
+  const apiResult = await callTinyFish(searchUrl, goal);
 
   if (!apiResult) {
     throw new Error(
@@ -198,6 +368,7 @@ export async function runScout(
 export async function runEnrichment(
   jobs: { title: string; url: string }[],
   maxJobs: number = 5,
+  skipCache: boolean = false,
 ): Promise<{
   results: {
     url: string;
@@ -217,6 +388,7 @@ export async function runEnrichment(
         job.url,
         goal,
         `jd-extract:${job.url}`,
+        skipCache,
       );
 
       // Attach source_url if the agent didn't include it
@@ -273,32 +445,40 @@ export async function runEnrichment(
 export async function runCompanyIntel(
   companyName: string,
   companyDomain: string,
+  skipCache: boolean = false,
 ): Promise<{ intel: CompanyIntel; metrics: AgentMetrics[] }> {
   const h1bUrl = `https://h1bdata.info/index.php?em=${encodeURIComponent(companyName)}`;
+  const myVisaJobsSlug = companyName.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+  const myVisaJobsUrl = `https://www.myvisajobs.com/employer/${myVisaJobsSlug}/`;
   const valuesUrl = `https://${companyDomain}/about`;
   const salaryUrl = `https://www.levels.fyi/companies/${companyName.toLowerCase()}/salaries`;
 
-  const [h1bResult, valuesResult, salaryResult] = await Promise.allSettled([
-    cachedTinyFishCall<H1BData>(h1bUrl, buildH1BGoal(), `h1b:${companyName}`),
+  const [h1bResult, myVisaJobsResult, valuesResult, salaryResult] = await Promise.allSettled([
+    cachedTinyFishCall<H1BData>(h1bUrl, buildH1BGoal(), `h1b:${companyName}`, skipCache),
+    cachedTinyFishCall<MyVisaJobsData>(myVisaJobsUrl, buildMyVisaJobsGoal(), `myvisajobs:${companyName}`, skipCache),
     cachedTinyFishCall<ValuesData>(
       valuesUrl,
       buildValuesGoal(),
       `values:${companyName}`,
+      skipCache,
     ),
     cachedTinyFishCall<SalaryData>(
       salaryUrl,
       buildSalaryGoal(),
       `salary:${companyName}`,
+      skipCache,
     ),
   ]);
 
   const allMetrics: AgentMetrics[] = [];
 
   const h1b = extractIntelResult<H1BData>(h1bResult, h1bUrl);
+  const myVisaJobs = extractIntelResult<MyVisaJobsData>(myVisaJobsResult, myVisaJobsUrl);
   const values = extractIntelResult<ValuesData>(valuesResult, valuesUrl);
   const salary = extractIntelResult<SalaryData>(salaryResult, salaryUrl);
 
   if (h1bResult.status === "fulfilled") allMetrics.push(h1bResult.value.metrics);
+  if (myVisaJobsResult.status === "fulfilled") allMetrics.push(myVisaJobsResult.value.metrics);
   if (valuesResult.status === "fulfilled")
     allMetrics.push(valuesResult.value.metrics);
   if (salaryResult.status === "fulfilled")
@@ -307,6 +487,8 @@ export async function runCompanyIntel(
   // Attach source_url to intel data if missing
   if (h1b.data && !h1b.data.source_url)
     (h1b.data as H1BData).source_url = h1bUrl;
+  if (myVisaJobs.data && !myVisaJobs.data.source_url)
+    (myVisaJobs.data as MyVisaJobsData).source_url = myVisaJobsUrl;
   if (values.data && !values.data.source_url)
     (values.data as ValuesData).source_url = valuesUrl;
   if (salary.data && !salary.data.source_url)
@@ -318,6 +500,11 @@ export async function runCompanyIntel(
         status: h1b.data ? "success" : "failed",
         data: h1b.data ?? undefined,
         latency_ms: h1b.latency_ms,
+      },
+      myvisajobs: {
+        status: myVisaJobs.data ? "success" : "failed",
+        data: myVisaJobs.data ?? undefined,
+        latency_ms: myVisaJobs.latency_ms,
       },
       values: {
         status: values.data ? "success" : "failed",

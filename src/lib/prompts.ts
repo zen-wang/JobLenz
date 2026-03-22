@@ -47,62 +47,45 @@ Rules:
 - For skills categorization: "languages" = programming languages, "frameworks" = libraries/frameworks, "tools" = dev tools/platforms, "cloud" = cloud services, "ml" = ML/AI specific tools.
 - Return ONLY the JSON object, no explanation.`;
 
-export const FIT_REPORT_PROMPT = `You are a senior technical hiring manager screening resumes against job descriptions. Given a candidate's resume profile, an enriched job description, and company intelligence data, produce a fit assessment.
+export const FIT_REPORT_PROMPT = `You are a senior technical hiring manager. Given a candidate's resume, a job description, and company data, score these 2 dimensions on a 0-100 scale.
 
-You score ONLY these 3 dimensions (1-10 scale). Visa, compensation, ATS keywords, location, and education are computed deterministically in code — do NOT score them.
+Skills Match and Visa Compatibility are computed deterministically in code — do NOT score them.
 
-1. **Technical Fit**: How well do the candidate's skills and tech stack match the job requirements?
-   - Sources: job description (required_qualifications, tech_stack), resume (skills, projects)
-   - Compare specific technologies, languages, frameworks
+1. **Experience Fit** (0-100):
+   Does the seniority level match? Compare years of experience, education level, and project complexity against the JD's requirements.
+   - Compare experience_years in JD vs actual resume experience
+   - Compare education level required vs candidate's degree
+   - Assess project complexity and role seniority
+   Example: "JD says 'entry-level or new grad'. User is MS graduating 2026 with 0 internships but strong projects. Score: 75"
 
-2. **Experience Alignment**: Does the candidate's experience level and domain match?
-   - Sources: job description (experience_years, responsibilities), resume (experience)
-   - Compare years, role seniority, domain relevance
-
-3. **Culture Alignment**: How well does the candidate align with company values?
-   - Sources: company values data (if available), resume (experience, projects)
-   - If values data status is "failed" or missing: set confidence to "low" and state "DATA UNAVAILABLE — company values agent did not return data"
+2. **Domain Relevance** (0-100):
+   Does the company's product domain overlap with the candidate's project experience?
+   - Compare the candidate's project descriptions against what the company actually does
+   - Look for concrete project-to-mission matches, not vague "values alignment"
+   Example: "User's S2-NS project is neuro-symbolic AI for legal reasoning. Anthropic works on AI alignment/safety. Domain overlap: AI safety research. Score: 90"
 
 Return valid JSON matching this exact schema:
 {
-  "dimensions": [
-    {
-      "name": "Technical Fit",
-      "score": <number 1-10>,
-      "reasoning": "<2-3 sentences explaining the score with specific evidence>",
-      "sources": ["<which data source: 'job_description', 'company_values', 'resume'>"],
-      "confidence": "<'high' | 'medium' | 'low'>",
-      "confidence_reason": "<why this confidence level>"
-    }
-  ],
-  "missing_requirements": {
-    "required": ["<must-have requirements the candidate lacks>"],
-    "preferred": ["<nice-to-have requirements the candidate lacks>"]
+  "experience_fit": {
+    "score": <number 0-100>,
+    "reasoning": "<2-3 sentences with specific evidence from resume and JD>",
+    "data_points": ["<specific fact 1>", "<specific fact 2>"]
   },
-  "strengths": [
-    {
-      "text": "<strength statement>",
-      "evidence": "<specific evidence from data>",
-      "source": "<data source>"
-    }
-  ],
-  "concerns": [
-    {
-      "text": "<concern statement>",
-      "evidence": "<specific evidence or 'DATA UNAVAILABLE'>",
-      "source": "<data source>"
-    }
-  ],
-  "next_steps": "<1-2 sentence recommendation for the candidate>"
+  "domain_relevance": {
+    "score": <number 0-100>,
+    "reasoning": "<2-3 sentences comparing candidate projects to company domain>",
+    "data_points": ["<specific project-to-domain match 1>", "<specific match 2>"]
+  },
+  "next_steps": "<1-2 sentence actionable recommendation>"
 }
 
-CRITICAL RULES:
-- NEVER hallucinate. If data is missing (agent status "failed"), say "DATA UNAVAILABLE" explicitly.
-- Every claim must cite its source (job_description, company_values, resume).
-- Do NOT include an overall_score — it is computed in code.
-- Do NOT score Visa, Compensation, ATS Keywords, Location, or Education — they are computed in code.
-- Include 2-4 strengths and 1-3 concerns.
-- For missing_requirements: list specific skills, tools, or qualifications from the JD that the candidate lacks. "required" = from required_qualifications, "preferred" = from preferred_qualifications.
+SCORING GUIDELINES:
+- Be generous. If a candidate has transferable or adjacent experience, give credit. A 70 means "reasonable fit with some gaps", not "perfect match".
+- Experience Fit: New grads applying to entry-level/new-grad roles should score 70-85. Adjacent experience (e.g. research projects in lieu of industry) counts. Only score below 50 if there's a clear mismatch (e.g. senior role but no work experience at all).
+- Domain Relevance: If the candidate's projects touch the same broad domain (e.g. ML projects for an ML company), score 65+. Only score below 40 if there is zero overlap. If company data is missing, score 55-65 and note data is unavailable.
+- data_points must be specific, traceable facts (e.g. "JD requires 5+ years, candidate has 2 years").
+- Do NOT include overall_score — it is computed in code.
+- Do NOT score Skills Match or Visa — they are computed deterministically.
 - Return ONLY the JSON object, no explanation.`;
 
 export const TAILOR_PROMPT = `You are a resume tailoring expert. Given a candidate's resume profile, a target job description, and a fit report, produce a tailored resume in RESUMX MARKDOWN FORMAT, plus a JSON changes summary.

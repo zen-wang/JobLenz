@@ -96,6 +96,35 @@ Return as JSON:
 }`;
 }
 
+export function buildMyVisaJobsGoal(): string {
+  return `Extract H-1B visa sponsorship data from this MyVisaJobs employer page.
+
+Look for:
+- Total LCA (Labor Condition Application) filings count
+- USCIS petition approval and denial counts (if shown in a table or chart by fiscal year)
+- Approval rate percentage
+- Green Card / PERM filing count (if shown)
+- Average offered salary
+- Most recent fiscal year of data
+
+If the page shows "No records found" or redirects to search, return:
+{ "company_name": "unknown", "lca_filings": null, "note": "No records found on MyVisaJobs" }
+
+If a cookie banner or popup appears, close it first.
+
+Return as JSON:
+{
+  "company_name": "string",
+  "lca_filings": number or null,
+  "uscis_approvals": number or null,
+  "uscis_denials": number or null,
+  "approval_rate": "string or null",
+  "green_card_filings": number or null,
+  "avg_salary": "string or null",
+  "most_recent_year": "string or null"
+}`;
+}
+
 export function buildValuesGoal(): string {
   return `Extract the company's mission, values, and recent information from this page.
 
@@ -114,6 +143,31 @@ Return as JSON:
   "stated_values": ["string"],
   "recent_news": ["string"],
   "blog_topics": ["string"]
+}`;
+}
+
+export function buildJobSearchGoal(): string {
+  return `Extract all visible job listings from this job search results page.
+
+For each listing extract:
+- Job title as displayed
+- Company name
+- Location if shown
+- The URL/link to the full job posting (the href from the job title link)
+
+Do NOT click into individual job postings.
+Do NOT click any Apply buttons.
+If a cookie banner or popup appears, close it first.
+If there are multiple pages, only extract from the first page.
+Scroll down to load more results if the page uses infinite scroll.
+
+Return as JSON:
+{
+  "filtered_url": "the current page URL",
+  "url_changed": false,
+  "jobs": [
+    { "title": "Machine Learning Engineer", "url": "https://...", "location": "San Francisco, CA", "company": "Anthropic" }
+  ]
 }`;
 }
 

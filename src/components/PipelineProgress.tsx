@@ -22,9 +22,7 @@ function getStatus(
   stageKey: PipelineStage,
   currentStage: PipelineStage,
 ): StageStatus {
-  if (currentStage === "error") {
-    return "failed";
-  }
+  if (currentStage === "error") return "failed";
 
   const stageOrder: Record<string, number> = {
     idle: 0,
@@ -47,12 +45,9 @@ function getStatus(
   const currentIdx = stageOrder[currentStage] ?? 0;
   const thisIdx = stageKeyOrder[stageKey] ?? 0;
 
-  // Tailor and Cover Letter are on-demand — only show as done/running
-  // if the pipeline has actually entered those stages
   if (stageKey === "tailoring" || stageKey === "cover_letter") {
     if (currentStage === stageKey) return "running";
     if (currentIdx > thisIdx) return "done";
-    // In "complete" state, only mark tailor/cover_letter done if we went through them
     if (currentStage === "complete" && currentIdx > thisIdx) return "done";
     return "pending";
   }
@@ -86,20 +81,28 @@ export default function PipelineProgress({ stage, discoverLogs }: PipelineProgre
                 <div
                   className={`
                     w-full h-2 rounded-full transition-all duration-500
-                    ${status === "done" ? "bg-green-500" : ""}
-                    ${status === "running" ? "bg-blue-500 animate-pulse" : ""}
-                    ${status === "failed" ? "bg-red-500" : ""}
-                    ${status === "pending" ? "bg-gray-200" : ""}
+                    ${status === "done" ? "shadow-[0_0_8px_rgba(16,185,129,0.3)]" : ""}
+                    ${status === "running" ? "animate-pulse shadow-[0_0_12px_rgba(59,130,246,0.3)]" : ""}
+                    ${status === "pending" ? "" : ""}
                   `}
+                  style={{
+                    backgroundColor:
+                      status === "done" ? "var(--accent-green)" :
+                      status === "running" ? "var(--accent-blue)" :
+                      status === "failed" ? "var(--accent-red)" :
+                      "rgba(255,255,255,0.05)",
+                    opacity: status === "pending" ? 1 : 0.7,
+                  }}
                 />
                 <span
-                  className={`
-                    mt-1.5 text-xs font-medium
-                    ${status === "done" ? "text-green-700" : ""}
-                    ${status === "running" ? "text-blue-600" : ""}
-                    ${status === "failed" ? "text-red-600" : ""}
-                    ${status === "pending" ? "text-gray-400" : ""}
-                  `}
+                  className="mt-1.5 text-xs font-medium"
+                  style={{
+                    color:
+                      status === "done" ? "var(--accent-green)" :
+                      status === "running" ? "var(--accent-blue)" :
+                      status === "failed" ? "var(--accent-red)" :
+                      "var(--text-muted)",
+                  }}
                 >
                   {s.label}
                 </span>
@@ -113,15 +116,15 @@ export default function PipelineProgress({ stage, discoverLogs }: PipelineProgre
       </div>
 
       {showLogs && (
-        <div className="bg-gray-900 rounded-lg p-3 max-h-36 overflow-y-auto font-mono text-xs">
+        <div className="glass-inner rounded-lg p-3 max-h-36 overflow-y-auto font-mono text-xs">
           {discoverLogs.map((msg, i) => (
             <div
               key={i}
-              className={
-                i === discoverLogs.length - 1
-                  ? "text-green-400"
-                  : "text-gray-500"
-              }
+              style={{
+                color: i === discoverLogs.length - 1
+                  ? "var(--accent-blue)"
+                  : "var(--text-muted)",
+              }}
             >
               {msg}
             </div>

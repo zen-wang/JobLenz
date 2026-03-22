@@ -15,20 +15,34 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
   }
 
-  const { jobs, company_name, company_domain, max_jobs } = body;
+  const { jobs, company_name, company_domain, max_jobs, skip_cache } = body;
 
-  if (!jobs?.length || !company_name || !company_domain) {
+  if (!jobs?.length) {
     return NextResponse.json(
-      { error: "jobs, company_name, and company_domain are required" },
+      { error: "jobs array is required" },
       { status: 400 },
     );
   }
 
   try {
-    // Fire JD extraction + company intel in parallel
+    // Fire JD extraction (always) + company intel (only if company info provided)
+    const enrichPromise = runEnrichment(jobs, max_jobs ?? 10, skip_cache ?? false);
+    const intelPromise =
+      company_name && company_domain
+        ? runCompanyIntel(company_name, company_domain, skip_cache ?? false)
+        : Promise.resolve({
+            intel: {
+              h1b: { status: "failed" as const, latency_ms: 0 },
+              myvisajobs: { status: "failed" as const, latency_ms: 0 },
+              values: { status: "failed" as const, latency_ms: 0 },
+              salary: { status: "failed" as const, latency_ms: 0 },
+            },
+            metrics: [],
+          });
+
     const [enrichResult, intelResult] = await Promise.all([
-      runEnrichment(jobs, max_jobs ?? 10),
-      runCompanyIntel(company_name, company_domain),
+      enrichPromise,
+      intelPromise,
     ]);
 
     const allMetrics: AgentMetrics[] = [

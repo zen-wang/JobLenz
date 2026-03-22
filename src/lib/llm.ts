@@ -55,6 +55,15 @@ function resolveProvider(): { provider: LLMProvider; apiKey: string } {
   );
 }
 
+// ─── Retry helper ────────────────────────────────────────────
+
+const MAX_RETRIES = 3;
+const BASE_DELAY_MS = 2000;
+
+async function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
 // ─── Gemini ──────────────────────────────────────────────────
 
 const GEMINI_MODEL = "gemini-2.5-flash";
@@ -65,48 +74,61 @@ async function callGemini(
 ): Promise<{ text: string; model: string }> {
   const url = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${apiKey}`;
 
-  const res = await fetch(url, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      system_instruction: {
-        parts: [{ text: req.systemPrompt }],
+  const body = JSON.stringify({
+    system_instruction: {
+      parts: [{ text: req.systemPrompt }],
+    },
+    contents: [
+      {
+        role: "user",
+        parts: [{ text: req.userPrompt }],
       },
-      contents: [
-        {
-          role: "user",
-          parts: [{ text: req.userPrompt }],
-        },
-      ],
-      generationConfig: {
-        maxOutputTokens: req.maxTokens ?? 8192,
-        temperature: 0.2,
-        responseMimeType: "application/json",
-      },
-    }),
+    ],
+    generationConfig: {
+      maxOutputTokens: req.maxTokens ?? 8192,
+      temperature: 0.2,
+      responseMimeType: "application/json",
+    },
   });
 
-  if (!res.ok) {
-    const body = await res.text();
-    throw new Error(`Gemini API error ${res.status}: ${body.slice(0, 300)}`);
+  for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+    const res = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body,
+    });
+
+    if (res.status === 429 && attempt < MAX_RETRIES) {
+      const delay = BASE_DELAY_MS * Math.pow(2, attempt);
+      console.warn(`[llm] Gemini 429 — retrying in ${delay}ms (attempt ${attempt + 1}/${MAX_RETRIES})`);
+      await sleep(delay);
+      continue;
+    }
+
+    if (!res.ok) {
+      const text = await res.text();
+      throw new Error(`Gemini API error ${res.status}: ${text.slice(0, 300)}`);
+    }
+
+    const data = await res.json();
+    const candidate = data?.candidates?.[0];
+    const text = candidate?.content?.parts?.[0]?.text ?? "";
+    const finishReason = candidate?.finishReason;
+
+    if (!text) {
+      throw new Error("Gemini returned empty response");
+    }
+
+    if (finishReason === "MAX_TOKENS") {
+      throw new Error(
+        `Gemini output truncated (maxOutputTokens=${req.maxTokens ?? 8192} was not enough). Increase maxTokens.`,
+      );
+    }
+
+    return { text, model: GEMINI_MODEL };
   }
 
-  const data = await res.json();
-  const candidate = data?.candidates?.[0];
-  const text = candidate?.content?.parts?.[0]?.text ?? "";
-  const finishReason = candidate?.finishReason;
-
-  if (!text) {
-    throw new Error("Gemini returned empty response");
-  }
-
-  if (finishReason === "MAX_TOKENS") {
-    throw new Error(
-      `Gemini output truncated (maxOutputTokens=${req.maxTokens ?? 8192} was not enough). Increase maxTokens.`,
-    );
-  }
-
-  return { text, model: GEMINI_MODEL };
+  throw new Error("Gemini API: max retries exceeded for 429 rate limit");
 }
 
 // ─── Claude ──────────────────────────────────────────────────
