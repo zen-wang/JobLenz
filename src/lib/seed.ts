@@ -20,17 +20,28 @@ interface SeedEntry {
  * that produces the matching cache key.
  */
 const SEED_ENTRIES: SeedEntry[] = [
-  // Scout result
+  // Anthropic
   {
     file: "anthropic-scout.json",
     url: "https://anthropic.com/careers",
     goalBuilder: () => buildScoutGoal("machine learning engineer"),
   },
-  // JD extraction for first job
   {
     file: "anthropic-jd-4952079008.json",
     url: "https://job-boards.greenhouse.io/anthropic/jobs/4952079008",
     goalBuilder: buildJDExtractionGoal,
+  },
+  // Spotify
+  {
+    file: "spotify-scout.json",
+    url: "https://www.lifeatspotify.com/jobs",
+    goalBuilder: () => buildScoutGoal("machine learning"),
+  },
+  // Adobe
+  {
+    file: "adobe-scout.json",
+    url: "https://careers.adobe.com",
+    goalBuilder: () => buildScoutGoal("machine learning"),
   },
 ];
 
