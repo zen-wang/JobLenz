@@ -129,11 +129,34 @@ export interface AgentMetrics {
 
 // === Pipeline State ===
 
+// === Tailor ===
+
+export interface TailorResult {
+  tailored_markdown: string;
+  changes_summary: {
+    sections_reordered: string[];
+    bullets_reordered: number;
+    keywords_added: string[];
+    content_removed: string[];
+  };
+}
+
+// === Cover Letter ===
+
+export interface CoverLetterResult {
+  cover_letter: string;
+  key_points: string[];
+}
+
+// === Pipeline State ===
+
 export type PipelineStage =
   | "idle"
   | "discovering"
   | "enriching"
   | "scoring"
+  | "tailoring"
+  | "cover_letter"
   | "complete"
   | "error";
 

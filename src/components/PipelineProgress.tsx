@@ -6,7 +6,7 @@ interface PipelineProgressProps {
   stage: PipelineStage;
 }
 
-const STAGES: { key: PipelineStage | "tailoring" | "cover_letter"; label: string }[] = [
+const STAGES: { key: PipelineStage; label: string }[] = [
   { key: "discovering", label: "Discover" },
   { key: "enriching", label: "Enrich" },
   { key: "scoring", label: "Score" },
@@ -17,15 +17,11 @@ const STAGES: { key: PipelineStage | "tailoring" | "cover_letter"; label: string
 type StageStatus = "pending" | "running" | "done" | "failed";
 
 function getStatus(
-  stageKey: string,
+  stageKey: PipelineStage,
   currentStage: PipelineStage,
 ): StageStatus {
   if (currentStage === "error") {
-    // Mark everything up to the failed stage
-    const order = ["discovering", "enriching", "scoring", "tailoring", "cover_letter"];
-    const idx = order.indexOf(stageKey);
-    // We don't know exactly which stage failed, so show the last running as failed
-    return idx === 0 ? "failed" : "pending";
+    return "failed";
   }
 
   const stageOrder: Record<string, number> = {
@@ -33,7 +29,9 @@ function getStatus(
     discovering: 1,
     enriching: 2,
     scoring: 3,
-    complete: 4,
+    tailoring: 4,
+    cover_letter: 5,
+    complete: 6,
   };
 
   const stageKeyOrder: Record<string, number> = {
@@ -46,6 +44,16 @@ function getStatus(
 
   const currentIdx = stageOrder[currentStage] ?? 0;
   const thisIdx = stageKeyOrder[stageKey] ?? 0;
+
+  // Tailor and Cover Letter are on-demand — only show as done/running
+  // if the pipeline has actually entered those stages
+  if (stageKey === "tailoring" || stageKey === "cover_letter") {
+    if (currentStage === stageKey) return "running";
+    if (currentIdx > thisIdx) return "done";
+    // In "complete" state, only mark tailor/cover_letter done if we went through them
+    if (currentStage === "complete" && currentIdx > thisIdx) return "done";
+    return "pending";
+  }
 
   if (thisIdx < currentIdx) return "done";
   if (thisIdx === currentIdx && currentStage !== "idle" && currentStage !== "complete")

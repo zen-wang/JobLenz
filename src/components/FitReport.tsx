@@ -13,6 +13,10 @@ interface FitReportProps {
     concerns: Evidence[];
     next_steps: string;
   };
+  onTailor?: () => void;
+  onCoverLetter?: () => void;
+  tailorLoading?: boolean;
+  coverLetterLoading?: boolean;
 }
 
 function overallScoreColor(score: number): string {
@@ -21,7 +25,13 @@ function overallScoreColor(score: number): string {
   return "text-red-600";
 }
 
-export default function FitReport({ job }: FitReportProps) {
+export default function FitReport({
+  job,
+  onTailor,
+  onCoverLetter,
+  tailorLoading,
+  coverLetterLoading,
+}: FitReportProps) {
   return (
     <div className="space-y-4">
       {/* Header with overall score */}
@@ -103,6 +113,44 @@ export default function FitReport({ job }: FitReportProps) {
         </h4>
         <p className="text-sm text-blue-900">{job.next_steps}</p>
       </div>
+
+      {/* Action buttons */}
+      {(onTailor || onCoverLetter) && (
+        <div className="flex gap-3 pt-2">
+          {onTailor && (
+            <button
+              onClick={onTailor}
+              disabled={tailorLoading}
+              className="flex-1 px-4 py-2 text-sm font-medium rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            >
+              {tailorLoading ? (
+                <span className="flex items-center justify-center gap-2">
+                  <span className="animate-spin w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full" />
+                  Tailoring...
+                </span>
+              ) : (
+                "Tailor Resume"
+              )}
+            </button>
+          )}
+          {onCoverLetter && (
+            <button
+              onClick={onCoverLetter}
+              disabled={coverLetterLoading}
+              className="flex-1 px-4 py-2 text-sm font-medium rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            >
+              {coverLetterLoading ? (
+                <span className="flex items-center justify-center gap-2">
+                  <span className="animate-spin w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full" />
+                  Generating...
+                </span>
+              ) : (
+                "Generate Cover Letter"
+              )}
+            </button>
+          )}
+        </div>
+      )}
     </div>
   );
 }

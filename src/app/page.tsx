@@ -8,6 +8,10 @@ import type {
   ScoreResult,
   ResumeProfile,
   CompanyIntel,
+  TailorResult,
+  CoverLetterResult,
+  JobDetails,
+  FitReport as FitReportType,
 } from "@/lib/types";
 import CompanyInput from "@/components/CompanyInput";
 import PipelineProgress from "@/components/PipelineProgress";
@@ -15,6 +19,8 @@ import DiscoverResults from "@/components/DiscoverResults";
 import FitReport from "@/components/FitReport";
 import CompanyIntelPanel from "@/components/CompanyIntelPanel";
 import ObservabilityPanel from "@/components/ObservabilityPanel";
+import TailorView from "@/components/TailorView";
+import CoverLetterView from "@/components/CoverLetterView";
 
 interface LLMMetadata {
   provider: string;
@@ -37,6 +43,12 @@ export default function Home() {
 
   const [selectedJobIdx, setSelectedJobIdx] = useState(0);
 
+  // Tailor & Cover Letter state (per-job, keyed by job URL)
+  const [tailorResults, setTailorResults] = useState<Record<string, TailorResult>>({});
+  const [coverLetterResults, setCoverLetterResults] = useState<Record<string, CoverLetterResult>>({});
+  const [tailorLoading, setTailorLoading] = useState<string | null>(null);
+  const [coverLetterLoading, setCoverLetterLoading] = useState<string | null>(null);
+
   const runPipeline = useCallback(
     async (input: {
       company_url: string;
@@ -52,6 +64,10 @@ export default function Home() {
       setCompanyIntel(null);
       setLlmMetadata(null);
       setSelectedJobIdx(0);
+      setTailorResults({});
+      setCoverLetterResults({});
+      setTailorLoading(null);
+      setCoverLetterLoading(null);
 
       try {
         // ─── Stage 1: Discover ───
@@ -139,7 +155,98 @@ export default function Home() {
     [],
   );
 
+  const handleTailor = useCallback(
+    async (jobUrl: string, jobTitle: string, jobDetails: JobDetails, fitReport: FitReportType) => {
+      if (!resumeProfile || tailorLoading) return;
+
+      setTailorLoading(jobUrl);
+      setStage("tailoring");
+      setError(null);
+
+      try {
+        const res = await fetch("/api/tailor", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            resume_profile: resumeProfile,
+            job_details: jobDetails,
+            fit_report: fitReport,
+          }),
+        });
+
+        if (!res.ok) {
+          const err = await res.json();
+          throw new Error(err.error || "Tailoring failed");
+        }
+
+        const data: TailorResult = await res.json();
+        setTailorResults((prev) => ({ ...prev, [jobUrl]: data }));
+        setStage("complete");
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Unknown error");
+        setStage("complete"); // Don't break the pipeline — stay on complete
+      } finally {
+        setTailorLoading(null);
+      }
+    },
+    [resumeProfile, tailorLoading],
+  );
+
+  const handleCoverLetter = useCallback(
+    async (jobUrl: string, jobDetails: JobDetails, fitReport: FitReportType) => {
+      if (!resumeProfile || coverLetterLoading) return;
+
+      setCoverLetterLoading(jobUrl);
+      setStage("cover_letter");
+      setError(null);
+
+      try {
+        const res = await fetch("/api/cover-letter", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            resume_profile: resumeProfile,
+            job_details: jobDetails,
+            company_intel: companyIntel,
+            fit_report: fitReport,
+          }),
+        });
+
+        if (!res.ok) {
+          const err = await res.json();
+          throw new Error(err.error || "Cover letter generation failed");
+        }
+
+        const data: CoverLetterResult = await res.json();
+        setCoverLetterResults((prev) => ({ ...prev, [jobUrl]: data }));
+        setStage("complete");
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Unknown error");
+        setStage("complete");
+      } finally {
+        setCoverLetterLoading(null);
+      }
+    },
+    [resumeProfile, companyIntel, coverLetterLoading],
+  );
+
   const selectedJob = scoreResult?.scored_jobs[selectedJobIdx];
+
+  // Find the enriched job details for the selected scored job
+  const selectedJobDetails = selectedJob
+    ? enrichResult?.enriched_jobs.find((j) => j.url === selectedJob.url)?.details ?? null
+    : null;
+
+  // Build FitReport object for the selected job
+  const selectedFitReport: FitReportType | null = selectedJob
+    ? {
+        overall_score: selectedJob.overall_score,
+        dimensions: selectedJob.dimensions,
+        strengths: selectedJob.strengths,
+        concerns: selectedJob.concerns,
+        next_steps: selectedJob.next_steps,
+      }
+    : null;
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -163,6 +270,8 @@ export default function Home() {
                 setResumeProfile(null);
                 setCompanyIntel(null);
                 setLlmMetadata(null);
+                setTailorResults({});
+                setCoverLetterResults({});
               }}
               className="text-xs text-gray-500 hover:text-gray-700 underline"
             >
@@ -236,7 +345,53 @@ export default function Home() {
                     </div>
                   )}
 
-                  {selectedJob && <FitReport job={selectedJob} />}
+                  {selectedJob && (
+                    <FitReport
+                      job={selectedJob}
+                      onTailor={
+                        selectedJobDetails && selectedFitReport
+                          ? () =>
+                              handleTailor(
+                                selectedJob.url,
+                                selectedJob.title,
+                                selectedJobDetails,
+                                selectedFitReport,
+                              )
+                          : undefined
+                      }
+                      onCoverLetter={
+                        selectedJobDetails && selectedFitReport
+                          ? () =>
+                              handleCoverLetter(
+                                selectedJob.url,
+                                selectedJobDetails,
+                                selectedFitReport,
+                              )
+                          : undefined
+                      }
+                      tailorLoading={tailorLoading === selectedJob.url}
+                      coverLetterLoading={coverLetterLoading === selectedJob.url}
+                    />
+                  )}
+                </section>
+              )}
+
+              {/* Tailor result */}
+              {selectedJob && tailorResults[selectedJob.url] && (
+                <section className="bg-white rounded-lg border border-gray-200 p-4">
+                  <TailorView
+                    result={tailorResults[selectedJob.url]}
+                    jobTitle={selectedJob.title}
+                  />
+                </section>
+              )}
+
+              {/* Cover letter result */}
+              {selectedJob && coverLetterResults[selectedJob.url] && (
+                <section className="bg-white rounded-lg border border-gray-200 p-4">
+                  <CoverLetterView
+                    result={coverLetterResults[selectedJob.url]}
+                  />
                 </section>
               )}
 
