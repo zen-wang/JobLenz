@@ -53,6 +53,42 @@ function extractTokens(texts: string[]): Set<string> {
   );
 }
 
+// Related tech — if candidate has one, count it as a partial match for the other
+const RELATED_TECH: [string, string][] = [
+  ["python", "pytorch"], ["python", "tensorflow"], ["python", "pandas"],
+  ["python", "numpy"], ["python", "scikit-learn"], ["python", "flask"],
+  ["python", "django"], ["python", "fastapi"],
+  ["javascript", "typescript"], ["typescript", "javascript"],
+  ["javascript", "react"], ["javascript", "node"], ["javascript", "nodejs"],
+  ["react", "next.js"], ["react", "nextjs"], ["react", "redux"],
+  ["aws", "cloud"], ["gcp", "cloud"], ["azure", "cloud"],
+  ["aws", "gcp"], ["aws", "azure"], ["gcp", "azure"],
+  ["docker", "kubernetes"], ["docker", "containers"], ["kubernetes", "k8s"],
+  ["postgresql", "sql"], ["mysql", "sql"], ["mongodb", "nosql"],
+  ["sql", "database"], ["nosql", "database"],
+  ["pytorch", "tensorflow"], ["tensorflow", "pytorch"],
+  ["pytorch", "deep-learning"], ["tensorflow", "deep-learning"],
+  ["machine-learning", "ml"], ["deep-learning", "dl"],
+  ["nlp", "natural-language"], ["cv", "computer-vision"],
+  ["java", "kotlin"], ["java", "scala"], ["java", "spring"],
+  ["c++", "c"], ["c#", ".net"],
+  ["git", "github"], ["ci", "cd"], ["ci", "jenkins"],
+  ["rest", "api"], ["graphql", "api"], ["grpc", "api"],
+  ["spark", "hadoop"], ["spark", "pyspark"], ["spark", "distributed"],
+  ["linux", "unix"], ["bash", "shell"],
+  ["agile", "scrum"], ["jira", "agile"],
+  ["llm", "gpt"], ["llm", "langchain"], ["llm", "rag"],
+  ["rag", "retrieval"], ["embeddings", "vectors"],
+];
+
+const RELATED_MAP = new Map<string, Set<string>>();
+for (const [a, b] of RELATED_TECH) {
+  if (!RELATED_MAP.has(a)) RELATED_MAP.set(a, new Set());
+  if (!RELATED_MAP.has(b)) RELATED_MAP.set(b, new Set());
+  RELATED_MAP.get(a)!.add(b);
+  RELATED_MAP.get(b)!.add(a);
+}
+
 export function computeSkillsMatch(
   jobDetails: JobDetails,
   resumeProfile: ResumeProfile,
@@ -90,31 +126,46 @@ export function computeSkillsMatch(
   const resumeArr = [...resumeTokens];
 
   for (const kw of jdTokens) {
-    const found = resumeArr.some((rk) => {
+    // Direct or substring match
+    const directMatch = resumeArr.some((rk) => {
       if (rk === kw) return true;
-      // Substring matching for tokens >= 3 chars (avoid "go", "r", "c" false positives)
       if (rk.length >= 3 && kw.includes(rk)) return true;
       if (kw.length >= 3 && rk.includes(kw)) return true;
       return false;
     });
-    if (found) matched.push(kw);
-    else missing.push(kw);
+
+    if (directMatch) {
+      matched.push(kw);
+      continue;
+    }
+
+    // Related-tech match — candidate has a related skill
+    const related = RELATED_MAP.get(kw);
+    if (related) {
+      const relatedMatch = resumeArr.some((rk) => related.has(rk));
+      if (relatedMatch) {
+        matched.push(kw);
+        continue;
+      }
+    }
+
+    missing.push(kw);
   }
 
   const total = matched.length + missing.length;
-  const rawScore = total > 0 ? Math.round((matched.length / total) * 100) : 60;
-  // Floor at 40 — if the job passed relevance filtering, there's baseline overlap
-  // Boost: any match at all means the candidate is in the right ballpark
+  const rawScore = total > 0 ? Math.round((matched.length / total) * 100) : 65;
+  // Floor at 45 — if the job passed relevance filtering, there's baseline overlap
+  // Boost: each matched skill adds credit (capped at +15)
   const boost = matched.length > 0 ? Math.min(matched.length * 3, 15) : 0;
-  const score = Math.min(Math.max(rawScore + boost, 40), 100);
+  const score = Math.min(Math.max(rawScore + boost, 45), 100);
 
   const dataPoints: string[] = [];
   if (matched.length > 0) dataPoints.push(`Matched: ${matched.slice(0, 10).join(", ")}`);
-  if (missing.length > 0) dataPoints.push(`Missing: ${missing.slice(0, 8).join(", ")}`);
+  if (missing.length > 0) dataPoints.push(`Gaps: ${missing.slice(0, 6).join(", ")}`);
 
   return {
     score,
-    reasoning: `${matched.length} of ${total} skill tokens matched. ${missing.length > 0 ? `Key gaps: ${missing.slice(0, 4).join(", ")}${missing.length > 4 ? "..." : ""}.` : "Strong skill overlap."}`,
+    reasoning: `${matched.length} of ${total} skill tokens matched (including related technologies). ${missing.length > 0 ? `Gaps: ${missing.slice(0, 3).join(", ")}${missing.length > 3 ? "..." : ""}.` : "Strong skill overlap."}`,
     data_points: dataPoints,
   };
 }
