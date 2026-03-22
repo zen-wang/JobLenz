@@ -126,7 +126,7 @@ export async function POST(req: NextRequest) {
           const careersUrl = normalizeCareersUrl(company.careers_url);
           const key = cacheKey(careersUrl, goal);
           const cached = skipCache ? null : await cacheGet<ScoutResult>(key);
-          if (cached) {
+          if (cached && Array.isArray(cached.jobs)) {
             cachedCompanies.push({ company, careersUrl, data: cached });
           } else {
             nonCachedCompanies.push({ company, careersUrl });
@@ -169,8 +169,9 @@ export async function POST(req: NextRequest) {
               );
               totalScoutLatency += scout.latency_ms;
               totalSteps += scout.steps_used;
+              const jobs = Array.isArray(scout.result.jobs) ? scout.result.jobs : [];
               let added = 0;
-              for (const j of scout.result.jobs) {
+              for (const j of jobs) {
                 if (!jobMap.has(j.url)) {
                   jobMap.set(j.url, { title: j.title, url: j.url, location: j.location, company: entry.company.name });
                   added++;
@@ -178,7 +179,7 @@ export async function POST(req: NextRequest) {
               }
               companiesScouted.push({ name: entry.company.name, domain: entry.company.domain, careers_url: entry.careersUrl });
               const msg = scout.cached
-                ? `${entry.company.name}: cache hit — ${scout.result.jobs.length} jobs`
+                ? `${entry.company.name}: cache hit — ${jobs.length} jobs`
                 : `${entry.company.name}: found ${added} jobs in ${(scout.latency_ms / 1000).toFixed(1)}s`;
               emit({ type: "progress", message: msg, sub_stage: "scout" });
             } catch (err) {

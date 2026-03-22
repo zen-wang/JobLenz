@@ -132,26 +132,26 @@ export default function FitReport({
 
       {/* 4 Dimension bars */}
       <div className="space-y-3">
-        <DimensionBar label="Skills Match" weight="30%" dimension={job.skills_match} />
-        <DimensionBar label="Experience Fit" weight="35%" dimension={job.experience_fit} />
+        <DimensionBar label="Skills Match" weight="25%" dimension={job.skills_match} />
+        <DimensionBar label="Experience Fit" weight="30%" dimension={job.experience_fit} />
         <DimensionBar label="Visa" weight="25%" dimension={job.visa_compatibility} />
-        <DimensionBar label="Domain" weight="10%" dimension={job.domain_relevance} />
+        <DimensionBar label="Domain" weight="20%" dimension={job.domain_relevance} />
       </div>
 
       {/* Formula display */}
       <div className="glass-inner p-2.5 rounded-lg">
         <div className="text-[10px] font-mono text-center" style={{ color: "var(--text-muted)" }}>
           {job.skills_match.score}
-          <span style={{ color: "var(--text-muted)", opacity: 0.5 }}> x0.3</span>
+          <span style={{ color: "var(--text-muted)", opacity: 0.5 }}> x0.25</span>
           {" + "}
           {job.experience_fit.score}
-          <span style={{ color: "var(--text-muted)", opacity: 0.5 }}> x0.35</span>
+          <span style={{ color: "var(--text-muted)", opacity: 0.5 }}> x0.3</span>
           {" + "}
           {job.visa_compatibility.score}
           <span style={{ color: "var(--text-muted)", opacity: 0.5 }}> x0.25</span>
           {" + "}
           {job.domain_relevance.score}
-          <span style={{ color: "var(--text-muted)", opacity: 0.5 }}> x0.1</span>
+          <span style={{ color: "var(--text-muted)", opacity: 0.5 }}> x0.2</span>
           {" = "}
           <span style={{ color: overallColor, fontWeight: 600 }}>{job.overall_score}%</span>
         </div>

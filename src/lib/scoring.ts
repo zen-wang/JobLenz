@@ -212,9 +212,9 @@ export function computeOverallScore(
   domain: AssessmentDimension,
 ): number {
   return Math.round(
-    skills.score * 0.30 +
-    experience.score * 0.35 +
+    skills.score * 0.25 +
+    experience.score * 0.30 +
     visa.score * 0.25 +
-    domain.score * 0.10,
+    domain.score * 0.20,
   );
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useCallback } from "react";
 import type { TailorResult } from "@/lib/types";
 import { renderResumxToHtml } from "@/lib/resumx-render";
 import { slugify, downloadBlob } from "@/lib/utils";
@@ -12,6 +12,7 @@ interface TailorViewProps {
 
 export default function TailorView({ result, jobTitle }: TailorViewProps) {
   const [copied, setCopied] = useState(false);
+  const [pdfLoading, setPdfLoading] = useState(false);
 
   const slug = slugify(jobTitle);
   const resumeHtml = useMemo(
@@ -25,20 +26,24 @@ export default function TailorView({ result, jobTitle }: TailorViewProps) {
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const handleDownloadMd = () => {
-    downloadBlob(result.tailored_markdown, `resume-${slug}.md`, "text/markdown");
-  };
-
-  const handleDownloadHtml = () => {
-    downloadBlob(resumeHtml, `resume-${slug}.html`, "text/html");
-  };
-
-  const handlePrint = () => {
+  const handleDownloadPdf = useCallback(() => {
+    setPdfLoading(true);
+    // Open HTML in a new window and trigger print (Save as PDF)
     const win = window.open("", "_blank");
-    if (!win) return;
+    if (!win) {
+      setPdfLoading(false);
+      return;
+    }
     win.document.write(resumeHtml);
     win.document.close();
-    win.onload = () => win.print();
+    win.onload = () => {
+      win.print();
+      setPdfLoading(false);
+    };
+  }, [resumeHtml]);
+
+  const handleDownloadMd = () => {
+    downloadBlob(result.tailored_markdown, `resume-${slug}.md`, "text/markdown");
   };
 
   const { changes_summary } = result;
@@ -51,16 +56,10 @@ export default function TailorView({ result, jobTitle }: TailorViewProps) {
         </h4>
         <div className="flex gap-1.5 flex-wrap">
           <button onClick={handleCopy} className="px-2.5 py-1 text-xs glass-btn">
-            {copied ? "Copied!" : "Copy"}
+            {copied ? "Copied!" : "Copy .md"}
           </button>
           <button onClick={handleDownloadMd} className="px-2.5 py-1 text-xs glass-btn">
-            .md
-          </button>
-          <button onClick={handleDownloadHtml} className="px-2.5 py-1 text-xs glass-btn glass-btn-primary">
-            .html
-          </button>
-          <button onClick={handlePrint} className="px-2.5 py-1 text-xs glass-btn glass-btn-primary">
-            Print / PDF
+            Download .md
           </button>
         </div>
       </div>
@@ -100,14 +99,21 @@ export default function TailorView({ result, jobTitle }: TailorViewProps) {
         </div>
       </div>
 
-      <div className="glass-inner rounded-lg overflow-hidden">
-        <iframe
-          srcDoc={resumeHtml}
-          title="Resume Preview"
-          className="w-full rounded-lg"
-          style={{ height: "800px", border: "none" }}
-        />
-      </div>
+      {/* Download PDF button */}
+      <button
+        onClick={handleDownloadPdf}
+        disabled={pdfLoading}
+        className="w-full py-2.5 text-sm font-semibold glass-btn glass-btn-primary rounded-xl"
+      >
+        {pdfLoading ? (
+          <span className="flex items-center justify-center gap-2">
+            <span className="animate-spin w-3.5 h-3.5 border-2 border-blue-300 border-t-transparent rounded-full" />
+            Preparing PDF...
+          </span>
+        ) : (
+          "Download PDF"
+        )}
+      </button>
     </div>
   );
 }
