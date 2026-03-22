@@ -1,0 +1,26 @@
+{
+  "filtered_url": "https://www.anthropic.com/careers/jobs",
+  "url_changed": true,
+  "jobs": [
+    {
+      "title": "Machine Learning Systems Engineer, Research Tools",
+      "url": "https://job-boards.greenhouse.io/anthropic/jobs/4952079008",
+      "location": "San Francisco, CA | New York City, NY | Seattle, WA"
+    },
+    {
+      "title": "Machine Learning Systems Engineer, RL Engineering",
+      "url": "https://job-boards.greenhouse.io/anthropic/jobs/4952051008",
+      "location": "San Francisco, CA | New York City, NY | Seattle, WA"
+    },
+    {
+      "title": "Research Engineer, Machine Learning (Reinforcement Learning)",
+      "url": "https://job-boards.greenhouse.io/anthropic/jobs/5115935008",
+      "location": "London, UK"
+    },
+    {
+      "title": "Research Engineer, Machine Learning (Reinforcement Learning)",
+      "url": "https://job-boards.greenhouse.io/anthropic/jobs/4613568008",
+      "location": "San Francisco, CA | New York City, NY"
+    }
+  ]
+}
